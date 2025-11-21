@@ -1,42 +1,46 @@
-\section{Methodology}
+\section{Method}
+\label{sec:method}
 
-Our system processes multi-camera synchronized video from a 4-corner intersection with 8 cameras to reconstruct static and dynamic 3D scene elements for Line-of-Sight visibility analysis.
+Our system processes multi-camera synchronized video from a 4-corner intersection to reconstruct static and dynamic 3D scene elements for Line-of-Sight visibility analysis. Figure~[3] illustrates the complete pipeline.
 
-\subsection{Data Preparation}
-\green{The project uses the StreetAware-LoS-Audit dataset with 8 synchronized camera videos capturing a 4-corner intersection. Global configuration is managed through \texttt{config/pipeline\_config.yaml}.}
+% Figure 3: Method pipeline diagram will be inserted here
 
-\subsection{\green{Pass 1: Static Scene Reconstruction [DONE]}}
-\green{\textbf{Goal:} Build a dense static 3D model of the intersection.}
+\subsection{\green{Pass 1: Static Scene Reconstruction}}
+\green{We extract static background images per camera via temporal median filtering and apply DUSt3R~\cite{dust3r} for multi-view geometry estimation. DUSt3R jointly optimizes camera poses and produces a dense global point cloud in a shared world frame with consistent camera intrinsics and extrinsics. This provides the geometric foundation for projecting 2D detections to 3D.}
 
-\green{\textbf{Method:} We extract static background images per camera and apply DUSt3R~\cite{dust3r} for multi-view geometry estimation and camera pose recovery. DUSt3R produces a global point cloud in a shared world frame with consistent camera intrinsics and extrinsics.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/Static_background.png}
+    \caption{Static background without any moving vehicles or pedestrians}
+    \label{fig:static_reconstruction}
+\end{figure}
 
-\green{\textbf{Outputs:} The system saves \texttt{dust3r\_pointcloud.ply} (dense static 3D scene) and \texttt{cameras.json} (intrinsics/extrinsics per camera) in \texttt{outputs/pass1\_static/}.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/Dust3r_pointcloud.png}
+    \caption{DUSt3R 3D point cloud}
+    \label{fig:dust3r_pointcloud}
+\end{figure}
 
-\green{\textbf{Status:} Implemented and producing consistent static geometry.}
+\subsection{Pass 2: Dynamic Object Tracking}
 
-\subsection{Pass 2: Dynamic Objects}
+\subsubsection{\green{Per-Camera Detection and Tracking}}
+\green{For each camera independently, we apply YOLOv8x~\cite{yolov8} for object detection on pedestrian and vehicle classes. ByteTrack~\cite{bytetrack} maintains object identities across frames by associating detection boxes, including low-confidence detections to handle occlusions. For each track, we project the 2D bounding box bottom center to a 3D ground-contact point using camera parameters from Pass 1 and a RANSAC-fitted ground plane from the static point cloud. We accumulate 3D positions over time to create 3D trails and classify each track as stationary or moving based on 3D displacement thresholds and 2D motion variance. This produces per-camera motion summaries with track metadata and annotated visualization videos for all 8 cameras.}
 
-\subsubsection{\green{Per-Camera Tracking [DONE]}}
-\green{\textbf{Implementation:} \texttt{pass2\_dynamic/single\_video\_motion.py} and \texttt{pass2\_dynamic/run\_all\_cameras\_motion.py}}
 
-\green{\textbf{Method:} For each camera, we run YOLOv8x~\cite{yolov8} for object detection (pedestrians and vehicles) and ByteTrack~\cite{bytetrack} for multi-object tracking. Each tracked object's 2D bounding box center is projected to an approximate 3D ground-contact point using camera parameters from Pass 1 and a ground plane fitted from the static point cloud. We classify tracks as stationary or moving based on 3D and 2D motion over time.}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/object_tracking.png}
+    \caption{Object tracking per camera}
+    \label{fig:object_tracking}
+\end{figure}
 
-\green{\textbf{Outputs:} Per-camera motion summaries (\texttt{\{cam\_id\}\_motion\_summary.json}) containing track metadata (track ID, class, category, stationarity, duration, 3D positions) and annotated visualization videos (\texttt{\{cam\_id\}\_motion\_annotated.mp4}).}
 
-\green{\textbf{Status:} Implemented and run for all 8 cameras.}
+\subsubsection{\red{Multi-Camera Association}}
+\red{To merge tracks across cameras viewing the same object, we will aggregate all per-camera tracks and perform multi-camera association using union-find clustering. Two tracks will be merged if they satisfy: (1) same category (person/vehicle), (2) 3D spatial proximity ($\leq$2.0m for vehicles, $\leq$1.0m for persons), and (3) temporal overlap ($\geq$0.3s absolute and $\geq$30\% relative). Each cluster will represent one global object instance with a unique ID across all camera views.}
 
-\subsubsection{\green{Multi-Camera Primitive Representation [DONE - First Pass]}}
-\green{\textbf{Implementation:} \texttt{pass2\_dynamic/multi\_camera\_primitives.py}}
+\subsubsection{\red{Canonical Primitive Representation}}
+\red{Each global object will be represented as a canonical 3D primitive in the DUSt3R world frame. Vehicles will be represented as axis-aligned bounding boxes with class-specific dimensions (e.g., car: 4.5$\times$1.8$\times$1.5m, truck: 8.0$\times$2.5$\times$3.0m). Pedestrians will be represented as vertical cylinders with radius 0.4m and height 1.7m. Centers will be computed as the mean of member track 3D positions. This representation enables efficient ray-geometry intersection testing for LoS analysis.}
 
-\green{\textbf{Method:} We aggregate tracks across all cameras and perform multi-camera association using union-find clustering based on category (person/vehicle), 3D spatial proximity ($\leq$2.0m for vehicles, $\leq$1.0m for persons), and temporal overlap. Each cluster represents one global object and is assigned a canonical 3D primitive: axis-aligned boxes for vehicles (with class-specific sizes) and vertical cylinders for pedestrians (radius 0.4m, height 1.7m).}
-
-\green{\textbf{Outputs:} \texttt{multi\_camera\_primitives.json} (object metadata and primitive parameters) and \texttt{multi\_camera\_primitives.ply} (point samples for visualization).}
-
-\green{\textbf{Status:} Implemented with first-pass results. \red{Known issue: Scale mismatch between DUSt3R world units and canonical primitive dimensions requires calibration.}}
-
-\subsection{\red{Line-of-Sight Audit [TODO]}}
-\red{\textbf{Goal:} Cast rays from pedestrian eye points to approaching vehicles, detecting occlusions from static and dynamic objects.}
-
-\red{\textbf{Planned Method:} For each pedestrian position, set eye points at standard heights and sample key points on approaching vehicles. Cast rays through the combined static point cloud and dynamic primitives at fine step sizes to determine visibility timing and occlusion causes.}
-
-\red{\textbf{Status:} Not yet implemented. Awaiting scale calibration and integration of primitive occluders into ray tracing.}
+\subsection{\red{Pass 3: Line-of-Sight Audit}}
+\red{For visibility analysis, we cast rays from pedestrian eye points (at standard heights 1.2-1.8m) to sample points on approaching vehicles. Ray-tracing through the combined static point cloud and dynamic primitive geometry determines occlusions. For each ray, we identify: (1) first visible frame, (2) visibility score over time, (3) occluder identity (static infrastructure, parked vehicle, or moving vehicle). This requires scale calibration to align primitive dimensions with DUSt3R's arbitrary metric and efficient spatial data structures for ray-geometry intersection testing.}

@@ -1,0 +1,25 @@
+\section{Data}
+\label{sec:data}
+
+We use the StreetAware dataset~\cite{piadyk_2023_q1byv-qc065}, a high-resolution synchronized multimodal urban scene dataset captured at a real 4-corner traffic intersection. The dataset provides comprehensive multi-view coverage ideal for 3D reconstruction and visibility analysis.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/Camera_Placement.png}
+    \caption{Camera placement indicated by green markers at the 4-corner traffic intersection}
+    \label{fig:camera_setup}
+\end{figure}
+
+\subsection{Data Characteristics}
+\textbf{Camera Setup:} 8 synchronized RGB cameras mounted at 4 corner positions (2 cameras per corner) provide full 360-degree coverage of the intersection. Each corner has cameras oriented to capture different viewing angles of the crosswalk area and approaching traffic lanes.
+
+\textbf{Synchronization:} All cameras are hardware-synchronized to capture frames at the same timestamp, essential for multi-view 3D reconstruction. Frame rate is sufficient to track pedestrian and vehicle motion.
+
+\textbf{Scene Complexity:} The intersection includes diverse elements: road surface, crosswalk markings, traffic signals, street furniture (poles, signs), parked vehicles, and moving traffic (cars, trucks, pedestrians, bicycles). This complexity makes it ideal for testing occlusion reasoning.
+
+\textbf{Video Duration:} Sample sequences span typical intersection activity, capturing multiple pedestrians crossing and vehicles approaching from different directions.
+
+% Figure 2: Multi-camera setup diagram and sample frames will be inserted here
+
+\subsection{Data Processing}
+\green{We extract static background frames by temporal median filtering to remove moving objects. For dynamic analysis, we process each camera's video stream independently for detection and tracking, creating 3D trails for each tracked object using the shared 3D world frame established by DUSt3R.} \red{We plan to fuse per-camera tracks across views using multi-camera association to create global object representations.}

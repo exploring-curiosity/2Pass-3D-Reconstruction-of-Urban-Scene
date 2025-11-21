@@ -1,9 +1,18 @@
 \section{Introduction}
 \label{sec:intro}
-This project creates a complete, time-consistent 3D video of a traffic intersection from eight synchronized cameras to audit the line-of-sight between pedestrians and approaching vehicles \cite{mildenhall2020nerf}. A two-pass method first generates a 3D snapshot for each moment, then temporally fuses partial views of dynamic subjects into complete 3D models so that occluded geometry is recovered before safety analysis, extending multi-view reconstruction ideas popularized by neural radiance fields~\cite{mildenhall2020nerf}. The final interactive 3D scene allows for precise ray-casting analysis to determine when a pedestrian's view of any vehicle travelling toward the intersection was obstructed, closing the gap between manual sight-distance checks and data-driven audits~\cite{aashto2018greenbook}.
 
-\subsection{Problem Statement}
-At urban intersections, pedestrians at the curb often face blocked views of approaching vehicles due to occlusions like parked cars, poles, or other obstacles. This visibility issue creates a serious safety risk, impairing people's ability to judge traffic conditions before crossing and contributing to preventable accidents documented in intersection safety reviews~\cite{lord2007safety}. In the United States alone, 7,388 pedestrians were killed in traffic crashes in 2021, with limited sight distance called out as a contributing factor in urban corridors~\cite{nhtsa2023pedestrian}.
+\subsection{Motivation}
+Urban intersection safety critically depends on visibility between pedestrians and approaching vehicles. At crosswalks, pedestrians often face blocked views due to parked cars, infrastructure, or other vehicles, creating serious safety risks. In the United States, 7,388 pedestrians were killed in traffic crashes in 2021, with limited sight distance cited as a contributing factor~\cite{nhtsa2023pedestrian}. Traditional line-of-sight (LoS) audits rely on manual 2D analysis or simple geometric rules that cannot capture complex 3D occlusions from dynamic objects and multi-view perspectives.
 
-\subsection{Research Significance}
-Solving this matters for safer streets and better urban design. By building time-consistent 3D models from multi-camera data, this project audits line-of-sight (LoS), a core principle of transportation safety \cite{aashto2018policy}, between pedestrians and vehicles, pinpointing exact blockers that hide dangers. These insights can drive real fixes, such as removing or redesigning obstacles, adding signs, or implementing smart traffic controls. Broader impacts include fewer pedestrian-vehicle crashes, improved transportation planning, and more accessible cities. Quantitatively, enhanced LoS could reduce accident rates, cut costs in healthcare and insurance, and minimize disruptions in daily mobility, leading to more resilient and people-centered urban environments while keeping documentation compatible with transportation design guidance~\cite{aashto2018greenbook}.
+\subsection{Our Approach}
+We present a two-pass 3D reconstruction system that processes synchronized multi-camera video to create time-consistent scenes with both static geometry and tracked dynamic objects for automated LoS visibility audits. 
+
+\textbf{\green{Pass 1 - Static Reconstruction:}} \green{We reconstruct the static scene using DUSt3R~\cite{dust3r} to establish a shared world coordinate system and dense point cloud from 8 synchronized cameras at a 4-corner intersection.}
+
+\textbf{Pass 2 - Dynamic Tracking:} \green{We track dynamic objects (pedestrians and vehicles) using YOLOv8x~\cite{yolov8} for detection and} \red{ByteTrack~\cite{bytetrack} for multi-object tracking.} \green{We perform per-camera tracking, classify objects as stationary vs. moving, and project 2D detections to 3D using camera parameters and ground plane fitting, creating 3D trails for each tracked object.} \red{Multi-camera association will merge tracks across views using spatial proximity and temporal overlap. Each global object will be represented as a canonical 3D primitive: axis-aligned boxes for vehicles, vertical cylinders for pedestrians.}
+
+\textbf{\red{Pass 3 - LoS Audit:}} \red{We will cast rays from pedestrian eye points to vehicles through the combined static + dynamic scene to determine visibility timing and identify occluders.}
+
+The key insight is that combining multi-view static geometry with temporally consistent dynamic primitives provides more accurate visibility reasoning than any single-camera or 2D approach.
+
+% Figure 1: Pipeline overview diagram will be inserted here

@@ -1,21 +1,14 @@
-\section{Proposal}
-\label{sec:proposal}
+\section{Related Work}
+\label{sec:related}
 
-\subsection{Related Work}
-Today, most visibility or safety audits at intersections are done manually or in 2D. City planners, engineers, or researchers usually look at 2D video footage, static camera views, or CAD maps to perform LOS audits~\cite{aashto2018greenbook}.
-$\newline$
-The issue is that real-world visibility is 3D and dynamic: people and vehicles move, change orientation, and are partially hidden by other moving or static objects. Traditional methods cannot capture these occlusions correctly, especially when multiple cameras or viewpoints are involved, so planners often miss hidden hazards.
+\subsection{Intersection Safety Audits}
+Traditional visibility and safety audits at intersections are done manually or in 2D. City planners and engineers typically analyze 2D video footage, static camera views, or CAD maps to perform LoS audits following guidelines like the AASHTO Green Book~\cite{aashto2018greenbook}. These methods cannot capture complex 3D occlusions from dynamic objects, leading to missed hazards. Recent work has shown that limited sight distance is a contributing factor in pedestrian fatalities~\cite{nhtsa2023pedestrian,lord2007safety}.
 
-\subsection{Proposed Method}
-We will build a 3D Line-of-Sight (LoS) Visibility Audit system that reconstructs intersections in full 3D and tests whether pedestrians at the curb can actually see approaching vehicles (and vice versa).
-$\newline$
-Use multi-view video data (8 synchronized cameras) to reconstruct a metric 3D model of the scene using \green{DUSt3R~\cite{dust3r}} for static scene reconstruction and camera pose estimation. Apply a two-pass reconstruction method: the first pass builds a dense static 3D point cloud of the intersection, and the second pass tracks dynamic objects (pedestrians and vehicles) using \green{YOLOv8x~\cite{yolov8}} for object detection and \green{ByteTrack~\cite{bytetrack}} for multi-object tracking across frames. Dynamic objects are represented as canonical 3D primitives (boxes for vehicles, cylinders for pedestrians) in the same world frame as the static scene.
-$\newline$
-Perform line-of-sight testing by casting rays from a pedestrian's eye point toward intersecting vehicles in the 3D scene, checking for occlusions from static and dynamic objects. This will allow us to produce a LOS audit, showing exactly where and when visibility is lost and which design elements or parked vehicles cause the issue.
-$\newline$
-The system outputs interactive reports that match the camera views used in safety studies while attaching 3D overlays that pinpoint root causes of occlusion.
+\subsection{Multi-View 3D Reconstruction}
+Multi-view stereo (MVS) methods like MVSNet~\cite{yao2018mvsnet} estimate depth from multiple calibrated views. Recent advances include DUSt3R~\cite{dust3r}, which jointly estimates camera poses and dense geometry from uncalibrated images, making it suitable for outdoor scenes. Neural radiance fields (NeRF)~\cite{mildenhall2020nerf} enable novel view synthesis but require extensive optimization. We adopt DUSt3R for its balance of quality and practicality in outdoor multi-view scenarios.
 
-\subsection{Why it works?}
-The system succeeds because the two-pass reconstruction gives us more complete and realistic 3D geometry than traditional single-pass or 2D methods. By separating static and dynamic elements, we recover accurate scene geometry while tracking moving objects efficiently. Proven tools like \green{DUSt3R~\cite{dust3r}} (for multi-view 3D reconstruction and pose estimation), \green{YOLOv8x~\cite{yolov8}} (for real-time object detection), and \green{ByteTrack~\cite{bytetrack}} (for robust multi-object tracking) give reliable and reproducible results. The primitive-based representation of dynamic objects (boxes and cylinders) provides computationally efficient occlusion testing while maintaining geometric accuracy.
-$\newline$
-In short, the method directly addresses the lack of full 3D, time-consistent visibility in current audits and leverages modern computer vision models to create a realistic, measurable, and interpretable audit system.
+\subsection{Object Detection and Tracking}
+Modern object detectors like YOLO~\cite{redmon2016yolo} and its successors (YOLOv8~\cite{yolov8}) achieve real-time performance on pedestrian and vehicle detection. Multi-object tracking (MOT) methods maintain object identities across frames. ByteTrack~\cite{bytetrack} uses a simple yet effective strategy of associating every detection box, including low-confidence ones, achieving state-of-the-art tracking performance. For multi-camera scenarios, tracks must be associated across views using spatial and temporal cues.
+
+\subsection{Our Contribution}
+We combine multi-view static reconstruction (DUSt3R) with per-camera dynamic tracking (YOLOv8x + ByteTrack) and multi-camera association to create a unified 3D scene representation for LoS audits. Unlike prior work that focuses on either static reconstruction or dynamic tracking, we explicitly separate and fuse both for accurate visibility analysis.
