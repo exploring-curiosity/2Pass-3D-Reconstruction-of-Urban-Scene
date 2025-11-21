@@ -1,0 +1,36 @@
+\section{Planned Experiments}
+\subsection{Data}
+Dataset: StreetAware: A High-Resolution Synchronized Multimodal Urban Scene Dataset~\cite{piadyk_2023_q1byv-qc065}
+$\newline$
+We use sample sequences captured by four corner sensor pods (8 synchronized RGB cameras).
+\subsection{Evaluation Metrics}
+\begin{itemize}
+    \item \textbf{End-to-End Line-of-Sight (LoS) Accuracy}
+    $\newline$
+    Visibility score (0-1): fraction of the vehicle's projected surface whose depth lies in front of the scene depth within $\pm$30 cm. Clear $\ge$ 0.6\; Partial 0.1-0.6\;  Complete $\leq$ 0.1
+    $\newline$
+    Occluder Attribution: Top-1 accuracy for identifying the blocking object (parked car, pole/sign, moving vehicle, tree/foliage).
+    \item \textbf{3D Completeness and Quality Metrics}
+    $\newline$
+    The 3D completeness and quality metrics assess the reliability of reconstructed geometry for LOS analysis. Voxel Occupancy Coverage (VOC) measures the percentage of occupied voxels within a 5 cm grid, indicating reconstruction density; and Multi-View Reprojection Consistency (MVRC) quantifies depth consistency across multiple views, also serving as a confidence filter~\cite{yao2018mvsnet}.
+\end{itemize}
+
+\subsection{Comparative Baselines}
+
+Backbones: FastVGGT (primary) vs PI3 (baseline for quality/speed trade-off)~\cite{fastvggt,pi3}
+$\newline$
+Confidence Usage: With vs without MVRC-based masking to demonstrate robustness against noisy geometry.
+$\newline$
+2D Control (No 3D): Simple image-plane line test between pedestrian and vehicle bounding boxes, labeling visible when no other box lies between, included to illustrate the necessity of 3D reasoning.
+
+\subsection{Hypotheses and Experiments}
+Hypothesis: A Two-Pass, confidence-filtered 3D reconstruction (actor completion across time + MVRC masking) produces more accurate LoS decisions and occluder identification than single-pass or 2D heuristics on StreetAware multi-view scenes~\cite{piadyk_2023_q1byv-qc065}.
+$\newline$
+Experiments:
+\begin{itemize}
+    \item \textbf{E1}: Establishes a baseline by fusing multi-view FastVGGT/PI3 outputs into a metric-scaled world point cloud and evaluating runtime and MVRC~\cite{fastvggt,pi3,yao2018mvsnet}.
+\item \textbf{E2}: Performs two-pass actor completion using tracking, segmentation, and ICP-based fusion to enhance VOC and MVRC~\cite{redmon2016yolo,kirillov2023segmentanything,besl1992method,yao2018mvsnet}.
+    \item \textbf{E3}: Builds an integrated 3D scene video combining static background and dynamic actors for qualitative inspection.
+    \item \textbf{E4}: Conducts the main LoS audit by casting rays from pedestrians to vehicles and evaluating visibility scores, benchmarking against the 2D control.
+    \item \textbf{E5}: Tests robustness under small pose perturbations, comparing FastVGGT vs PI3, single-frame vs two-pass, and 3D vs 2D control approaches~\cite{fastvggt,pi3}.
+\end{itemize}

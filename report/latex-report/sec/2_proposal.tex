@@ -1,0 +1,21 @@
+\section{Proposal}
+\label{sec:proposal}
+
+\subsection{Related Work}
+Today, most visibility or safety audits at intersections are done manually or in 2D. City planners, engineers, or researchers usually look at 2D video footage, static camera views, or CAD maps to perform LOS audits~\cite{aashto2018greenbook}.
+$\newline$
+The issue is that real-world visibility is 3D and dynamic: people and vehicles move, change orientation, and are partially hidden by other moving or static objects. Traditional methods cannot capture these occlusions correctly, especially when multiple cameras or viewpoints are involved, so planners often miss hidden hazards.
+
+\subsection{Proposed Method}
+We will build a 3D Line-of-Sight (LoS) Visibility Audit system that reconstructs intersections in full 3D and tests whether pedestrians at the curb can actually see approaching vehicles (and vice versa).
+$\newline$
+Use multi-view video data (8 synchronized cameras) to reconstruct a metric 3D model of the scene using \green{DUSt3R~\cite{dust3r}} for static scene reconstruction and camera pose estimation. Apply a two-pass reconstruction method: the first pass builds a dense static 3D point cloud of the intersection, and the second pass tracks dynamic objects (pedestrians and vehicles) using \green{YOLOv8x~\cite{yolov8}} for object detection and \green{ByteTrack~\cite{bytetrack}} for multi-object tracking across frames. Dynamic objects are represented as canonical 3D primitives (boxes for vehicles, cylinders for pedestrians) in the same world frame as the static scene.
+$\newline$
+Perform line-of-sight testing by casting rays from a pedestrian's eye point toward intersecting vehicles in the 3D scene, checking for occlusions from static and dynamic objects. This will allow us to produce a LOS audit, showing exactly where and when visibility is lost and which design elements or parked vehicles cause the issue.
+$\newline$
+The system outputs interactive reports that match the camera views used in safety studies while attaching 3D overlays that pinpoint root causes of occlusion.
+
+\subsection{Why it works?}
+The system succeeds because the two-pass reconstruction gives us more complete and realistic 3D geometry than traditional single-pass or 2D methods. By separating static and dynamic elements, we recover accurate scene geometry while tracking moving objects efficiently. Proven tools like \green{DUSt3R~\cite{dust3r}} (for multi-view 3D reconstruction and pose estimation), \green{YOLOv8x~\cite{yolov8}} (for real-time object detection), and \green{ByteTrack~\cite{bytetrack}} (for robust multi-object tracking) give reliable and reproducible results. The primitive-based representation of dynamic objects (boxes and cylinders) provides computationally efficient occlusion testing while maintaining geometric accuracy.
+$\newline$
+In short, the method directly addresses the lack of full 3D, time-consistent visibility in current audits and leverages modern computer vision models to create a realistic, measurable, and interpretable audit system.
