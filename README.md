@@ -114,6 +114,26 @@ python pass2_dynamic/reconstruct_objects.py
 - `outputs/pass2_dynamic/objects_3d/object_<id>.ply` - Per-object point clouds
 - `outputs/pass2_dynamic/objects_3d/summary.txt` - Summary statistics
 
+### Phase 3: Interactive Visualization
+
+```bash
+python visualize_tracking.py
+```
+
+**Features:**
+- **Left Panel:** Video playback with bounding boxes showing all tracked objects
+- **Right Panel:** 3D reconstruction and trajectory visualization
+- **Interactive Selection:** Click on objects or select from list to view their 3D reconstruction
+- **Playback Controls:** Play/pause, frame navigation, timeline scrubbing
+- **Real-time Info:** Velocities, directions, entry/exit times
+
+**Controls:**
+- Select camera from dropdown
+- Click on object in video or select from track list
+- Use play/pause and frame navigation buttons
+- Drag timeline slider to scrub through video
+- View 3D trajectory and reconstruction in right panel
+
 ## 📊 JSON Output Format
 
 The main output `objects_3d.json` contains position and angle mappings:
@@ -190,10 +210,12 @@ static-scene/
 │   │   └── cameras.json
 │   └── pass2_dynamic/
 │       ├── tracks_*.pkl
+│       ├── trajectories.json         # 2D trajectory data
 │       └── objects_3d/
 │           ├── objects_3d.json       # ← Main output
 │           ├── object_*.ply
 │           └── summary.txt
+├── visualize_tracking.py             # Interactive visualizer
 ├── install_dependencies.sh
 ├── requirements.txt
 ├── .gitignore                        # Excludes repos, models, data
