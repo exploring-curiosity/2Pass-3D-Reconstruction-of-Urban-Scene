@@ -164,3 +164,7 @@ dmypy.json
 *.tar.gz
 *.tar
 *.rar
+
+
+/bkp/
+/Pi3/

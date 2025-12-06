@@ -240,7 +240,7 @@ class TrackInfo:
 class Camera3D:
     """Simple pinhole camera model with ground-plane projection.
 
-    We intersect camera rays with a fitted plane n·X + d = 0 in DUSt3R world
+    We intersect camera rays with a fitted plane n·X + d = 0 in world
     coordinates. This plane is estimated once from the pass1 point cloud.
     """
 
@@ -274,7 +274,7 @@ class Camera3D:
         self.video_height = float(video_height)
 
     def project_pixel_to_ground(self, u_img: float, v_img: float) -> Optional[np.ndarray]:
-        """Project image pixel to the fitted world plane in DUSt3R coordinates.
+        """Project image pixel to the fitted world plane in world coordinates.
 
         Handles the scale difference between the calibration resolution and the
         actual video resolution by simple linear scaling.
@@ -332,7 +332,7 @@ class SingleVideoMotionTracker:
         # Pass1 (for camera calibration + point cloud)
         self.pass1_dir = Path(config["data"]["output_dir"]) / "pass1_static"
         self.camera3d: Optional[Camera3D] = None
-        # Estimated ground plane n·X + d = 0 in DUSt3R coordinates
+        # Estimated ground plane n·X + d = 0 in world coordinates
         self.plane_normal: Optional[np.ndarray] = None
         self.plane_d: Optional[float] = None
         # World origin at the centroid of all camera centers (for reference)
@@ -367,14 +367,14 @@ class SingleVideoMotionTracker:
         self.logger.info("✓ YOLO loaded")
 
     def _estimate_ground_plane(self) -> None:
-        """Estimate ground plane from DUSt3R point cloud using PCA.
+        """Estimate ground plane from Pi3 point cloud using PCA.
 
         We assume the road is the dominant roughly horizontal surface, so the
         plane normal should have a strong Z component.
         """
-        ply_path = self.pass1_dir / "dust3r_pointcloud.ply"
+        ply_path = self.pass1_dir / "pi3_pointcloud_corrected.ply"
         if not ply_path.exists():
-            self.logger.warning(f"No DUSt3R point cloud found at {ply_path}, 3D motion disabled")
+            self.logger.warning(f"No Pi3 point cloud found at {ply_path}, 3D motion disabled")
             self.plane_normal = None
             self.plane_d = None
             return
@@ -433,9 +433,9 @@ class SingleVideoMotionTracker:
 
     def _init_camera3d_for_camera(self, cam_id: str, video_width: int, video_height: int):
         """Load calibration for a given camera from pass1 and build Camera3D."""
-        camera_file = self.pass1_dir / "cameras.json"
+        camera_file = self.pass1_dir / "pi3_cameras_corrected.json"
         if not camera_file.exists():
-            self.logger.warning(f"No cameras.json found at {camera_file}, 3D positions disabled")
+            self.logger.warning(f"No pi3_cameras_corrected.json found at {camera_file}, 3D positions disabled")
             self.camera3d = None
             return
 
@@ -443,7 +443,7 @@ class SingleVideoMotionTracker:
             cam_data = json.load(f)
 
         if cam_id not in cam_data:
-            self.logger.warning(f"Camera {cam_id} not found in cameras.json, 3D positions disabled")
+            self.logger.warning(f"Camera {cam_id} not found in pi3_cameras_corrected.json, 3D positions disabled")
             self.camera3d = None
             return
 
@@ -673,6 +673,13 @@ class SingleVideoMotionTracker:
             json.dump(summary, f, indent=2)
         self.logger.info(f"Saved summary to {summary_path}")
 
+        # Save detailed trajectories for 4D reconstruction
+        trajectories = self._build_trajectories(cam_id, fps)
+        traj_path = self.output_dir / f"{cam_id}_trajectories.json"
+        with open(traj_path, "w") as f:
+            json.dump(trajectories, f, indent=2)
+        self.logger.info(f"Saved trajectories to {traj_path}")
+
         # Second pass: write annotated video
         output_video_path = self.output_dir / f"{cam_id}_motion_annotated.mp4"
         self._write_annotated_video(video_path, output_video_path, fps, width, height)
@@ -794,6 +801,49 @@ class SingleVideoMotionTracker:
             "tracks": track_summaries,
         }
         return summary
+
+    def _build_trajectories(self, cam_id: str, fps: float) -> Dict:
+        """Build detailed per-frame trajectory data for all tracks.
+        
+        Returns a dict with trajectory info for each track, including
+        per-frame 3D positions for 4D reconstruction.
+        """
+        trajectories = []
+        
+        for track in self.tracks.values():
+            if not track.detections:
+                continue
+            
+            # Build per-frame trajectory
+            frames = []
+            for det in track.detections:
+                frame_data = {
+                    "frame_idx": int(det.frame_idx),
+                    "time_sec": float(det.time_sec),
+                    "bbox": det.bbox.tolist() if det.bbox is not None else None,
+                    "center_px": det.center.tolist() if det.center is not None else None,
+                    "position_3d": det.position_3d.tolist() if det.position_3d is not None else None,
+                }
+                frames.append(frame_data)
+            
+            # Sort by frame index
+            frames.sort(key=lambda x: x["frame_idx"])
+            
+            trajectories.append({
+                "track_id": int(track.track_id),
+                "class_name": track.class_name,
+                "category": track.category,
+                "is_stationary": bool(track.is_stationary),
+                "num_frames": len(frames),
+                "frames": frames,
+            })
+        
+        return {
+            "camera_id": cam_id,
+            "fps": float(fps),
+            "num_tracks": len(trajectories),
+            "trajectories": trajectories,
+        }
 
     def _write_annotated_video(self, video_path: Path, output_path: Path, fps: float, width: int, height: int):
         self.logger.info("Writing annotated video...")
