@@ -53,8 +53,8 @@ def run_pi3_reconstruction(images: dict, output_dir: Path, device: str = "cuda")
     
     # Convert to tensor: [N, 3, H, W] with values in [0, 1]
     # Pi3 expects resolution divisible by patch size (14)
-    # Use 518x392 (closest to 512x384 that's divisible by 14)
-    target_h, target_w = 392, 518
+    # Use 1036x784 (double resolution for more detail)
+    target_h, target_w = 784, 1036
     
     imgs_resized = []
     for img in img_list:
@@ -120,7 +120,7 @@ def run_pi3_reconstruction(images: dict, output_dir: Path, device: str = "cuda")
     print(f"Confidence range: [{all_conf.min():.3f}, {all_conf.max():.3f}]")
     
     # Filter by confidence
-    conf_threshold = np.percentile(all_conf, 20)  # Keep top 80%
+    conf_threshold = np.percentile(all_conf, 5)  # Keep top 95% (relaxed from 80%)
     mask = all_conf > conf_threshold
     
     filtered_points = all_points[mask]
@@ -131,7 +131,7 @@ def run_pi3_reconstruction(images: dict, output_dir: Path, device: str = "cuda")
     # Filter outliers
     center = filtered_points.mean(axis=0)
     distances = np.linalg.norm(filtered_points - center, axis=1)
-    max_dist = np.percentile(distances, 95)
+    max_dist = np.percentile(distances, 99)  # Relaxed outlier removal
     
     mask2 = distances < max_dist
     filtered_points = filtered_points[mask2]

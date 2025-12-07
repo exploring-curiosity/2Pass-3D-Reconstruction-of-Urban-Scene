@@ -89,8 +89,8 @@ def main():
     base_dir = Path(__file__).parent
     output_dir = base_dir / "outputs"
     
-    # Conda/mamba activation prefix
-    conda_prefix = 'eval "$(mamba shell hook --shell bash)" && mamba activate acv2 &&'
+    # Use current python executable
+    python_exe = sys.executable
     
     if args.clean:
         clean_outputs(output_dir)
@@ -98,10 +98,10 @@ def main():
     if args.viewer_only:
         # Just launch viewer
         if args.native_viewer:
-            cmd = f'{conda_prefix} python viewer/native_viewer.py'
+            cmd = [python_exe, 'viewer/native_viewer.py']
         else:
-            cmd = f'{conda_prefix} python viewer/viewer_server.py'
-        subprocess.run(['bash', '-c', cmd], cwd=str(base_dir))
+            cmd = [python_exe, 'viewer/viewer_server.py']
+        subprocess.run(cmd, cwd=str(base_dir))
         return
     
     success = True
@@ -110,15 +110,15 @@ def main():
     if not args.skip_pass1:
         pi3_ply = output_dir / "pass1_static" / "pi3_pointcloud.ply"
         if not pi3_ply.exists():
-            cmd = f'{conda_prefix} python pass1_static/test_pi3.py'
-            success = subprocess.run(['bash', '-c', cmd], cwd=str(base_dir)).returncode == 0
+            cmd = [python_exe, 'pass1_static/test_pi3.py']
+            success = subprocess.run(cmd, cwd=str(base_dir)).returncode == 0
             if not success:
                 print("❌ Pi3 reconstruction failed")
                 return
     
     # Step 2: Fix Orientation
-    cmd = f'{conda_prefix} python pass1_static/fix_pi3_orientation.py'
-    success = subprocess.run(['bash', '-c', cmd], cwd=str(base_dir)).returncode == 0
+    cmd = [python_exe, 'pass1_static/fix_pi3_orientation.py']
+    success = subprocess.run(cmd, cwd=str(base_dir)).returncode == 0
     if not success:
         print("❌ Orientation fix failed")
         return
@@ -133,16 +133,16 @@ def main():
             print("    for each camera: s1-left, s1-right, s2-left, s2-right, etc.")
     
     # Step 4: Reproject Trajectories
-    cmd = f'{conda_prefix} python pass2_dynamic/reproject_trajectories.py'
-    success = subprocess.run(['bash', '-c', cmd], cwd=str(base_dir)).returncode == 0
+    cmd = [python_exe, 'pass2_dynamic/reproject_trajectories.py']
+    success = subprocess.run(cmd, cwd=str(base_dir)).returncode == 0
     if not success:
         print("❌ Trajectory reprojection failed")
         return
     
     # Step 5: Render Video (optional)
     if args.render_video:
-        cmd = f'{conda_prefix} python pass2_dynamic/render_4d_boxes.py --camera s1-right'
-        subprocess.run(['bash', '-c', cmd], cwd=str(base_dir))
+        cmd = [python_exe, 'pass2_dynamic/render_4d_boxes.py', '--camera', 's1-right']
+        subprocess.run(cmd, cwd=str(base_dir))
     
     # Step 6: Launch Viewer
     print("\n" + "="*60)
@@ -150,10 +150,10 @@ def main():
     print("="*60 + "\n")
     
     if args.native_viewer:
-        cmd = f'{conda_prefix} python viewer/native_viewer.py'
+        cmd = [python_exe, 'viewer/native_viewer.py']
     else:
-        cmd = f'{conda_prefix} python viewer/viewer_server.py'
-    subprocess.run(['bash', '-c', cmd], cwd=str(base_dir))
+        cmd = [python_exe, 'viewer/viewer_server.py']
+    subprocess.run(cmd, cwd=str(base_dir))
 
 
 if __name__ == "__main__":

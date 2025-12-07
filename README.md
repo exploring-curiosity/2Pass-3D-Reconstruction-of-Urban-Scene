@@ -60,6 +60,34 @@ mamba activate acv2
 ./install_dependencies.sh
 ```
 
+## ⚡ HPC Cluster Execution (NYU Greene)
+
+Since you don't have a local GPU, run the pipeline on the HPC cluster:
+
+1. **Connect & Setup:**
+   ```bash
+   ssh <netid>@greene.hpc.nyu.edu
+   ssh burst
+   cd <project_dir>
+   
+   # Setup Singularity overlay and images (run once)
+   ./setup_hpc.sh
+   ```
+
+2. **Environment Installation:**
+   Follow the instructions printed by `setup_hpc.sh` to install dependencies inside the container.
+   Basically:
+   - Start interactive GPU session
+   - Launch Singularity with RW overlay
+   - Install Conda + `requirements.txt` + `Pi3` repo
+
+3. **Run Pipeline:**
+   ```bash
+   sbatch run_hpc.slurm
+   ```
+   Check status with `squeue -u <netid>`.
+   Logs will be saved to `*_recon.out`.
+
 **Requirements:**
 - NVIDIA GPU with CUDA (RTX 3080+ recommended)
 - 11+ GB VRAM
