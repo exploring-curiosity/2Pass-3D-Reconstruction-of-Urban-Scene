@@ -21,7 +21,7 @@ else
     echo "Downloading Singularity image..."
     # Check if we are on Greene (can scp from greene-dtn or cp if mounted)
     # The HPC.md says scp from greene-dtn.
-    if [[ $(hostname) == *"greene"* || $(hostname) == *"burst"* ]]; then
+    if [[ $(hostname) == *"greene"* || $(hostname) == *"burst"* || $(hostname) == *"log-"* ]]; then
         # Try local copy first (if /scratch/work is mounted)
         if [ -f "$SINGULARITY_SRC" ]; then
              cp "$SINGULARITY_SRC" .
