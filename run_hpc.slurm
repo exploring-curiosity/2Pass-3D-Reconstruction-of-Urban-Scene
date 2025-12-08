@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=urban_3d_recon
-#SBATCH --account=users
-#SBATCH --partition=n1s8-v100-1
+#SBATCH --account=ece_gy_9193-2025fa
+#SBATCH --partition=c12m85-a100-1
 #SBATCH --gres=gpu:1
 #SBATCH --time=04:00:00
 #SBATCH --output=%j_recon.out
