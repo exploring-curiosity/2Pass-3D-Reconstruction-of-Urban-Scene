@@ -23,6 +23,9 @@ echo "Working directory: $WORK_DIR"
 
 # Launch Singularity
 # We bind /scratch and current directory
+module purge
+module load singularity
+
 singularity exec --bind /scratch --nv \
     --overlay "$WORK_DIR/$OVERLAY_FILE:ro" \
     "$WORK_DIR/$SINGULARITY_FILE" \

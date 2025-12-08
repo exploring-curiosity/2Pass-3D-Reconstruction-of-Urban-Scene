@@ -15,6 +15,9 @@ WORK_DIR=$(pwd)
 echo "Installation job started on $(hostname)"
 
 # We need to run in RW mode to install things
+module purge
+module load singularity
+
 singularity exec --bind /scratch --nv \
     --overlay "$WORK_DIR/$OVERLAY_FILE:rw" \
     "$WORK_DIR/$SINGULARITY_FILE" \

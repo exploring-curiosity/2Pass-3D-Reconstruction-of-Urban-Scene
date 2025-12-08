@@ -60,7 +60,7 @@ Below is a example command.
 This requests a V100 for 4 hours:
 
 ```bash
-srun --account=ece_gy_9193_001-2024fa --partition=n1s8-v100-1 --gres=gpu:1 --time=04:00:00 --pty /bin/bash
+srun --account=ece_gy_9193-2025fa --partition=c12m85-a100-1 --gres=gpu:1 --time=01:00:00 --pty /bin/bash
 ```
 
 Other partitions are `n1s8-t4-1`, `c12m85-a100-1`. you can use `interactive` to debug, copy.  You can run `sinfo` to get a list of available partitions.
