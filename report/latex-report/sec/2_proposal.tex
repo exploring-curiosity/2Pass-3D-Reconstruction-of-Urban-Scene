@@ -1,14 +1,32 @@
 \section{Related Work}
 \label{sec:related}
 
-\subsection{Intersection Safety Audits}
-Traditional visibility and safety audits at intersections are done manually or in 2D. City planners and engineers typically analyze 2D video footage, static camera views, or CAD maps to perform LoS audits following guidelines like the AASHTO Green Book~\cite{aashto2018greenbook}. These methods cannot capture complex 3D occlusions from dynamic objects, leading to missed hazards. Recent work has shown that limited sight distance is a contributing factor in pedestrian fatalities~\cite{nhtsa2023pedestrian,lord2007safety}.
+\subsection{Intersection Safety and Visibility Analysis}
+
+Traditional visibility audits at urban intersections rely on manual inspection or simplified 2D geometric analysis following guidelines such as the AASHTO Green Book~\cite{aashto2018greenbook}. These methods assess sight triangles and stopping sight distances but cannot capture complex 3D occlusions from dynamic objects. Recent studies have highlighted limited sight distance as a significant contributing factor in pedestrian fatalities~\cite{nhtsa2023pedestrian,lord2007safety}. Automated video-based safety analysis has emerged as a promising alternative~\cite{saunier2010automated}, though most approaches remain limited to 2D trajectory analysis without explicit 3D reasoning.
 
 \subsection{Multi-View 3D Reconstruction}
-Multi-view stereo (MVS) methods like MVSNet~\cite{yao2018mvsnet} estimate depth from multiple calibrated views. Recent advances include DUSt3R~\cite{dust3r}, which jointly estimates camera poses and dense geometry from uncalibrated images, making it suitable for outdoor scenes. Neural radiance fields (NeRF)~\cite{mildenhall2020nerf} enable novel view synthesis but require extensive optimization. We adopt DUSt3R for its balance of quality and practicality in outdoor multi-view scenarios.
 
-\subsection{Object Detection and Tracking}
-Modern object detectors like YOLO~\cite{redmon2016yolo} and its successors (YOLOv8~\cite{yolov8}) achieve real-time performance on pedestrian and vehicle detection. Multi-object tracking (MOT) methods maintain object identities across frames. ByteTrack~\cite{bytetrack} uses a simple yet effective strategy of associating every detection box, including low-confidence ones, achieving state-of-the-art tracking performance. For multi-camera scenarios, tracks must be associated across views using spatial and temporal cues.
+Multi-view stereo (MVS) methods estimate dense 3D geometry from multiple calibrated camera views. Classical approaches like COLMAP~\cite{schoenberger2016sfm} combine Structure-from-Motion (SfM) for camera pose estimation with MVS for dense reconstruction. Learning-based methods including MVSNet~\cite{yao2018mvsnet} and its variants predict depth maps from cost volumes constructed across views.
 
-\subsection{Our Contribution}
-We combine multi-view static reconstruction (DUSt3R) with per-camera dynamic tracking (YOLOv8x + ByteTrack) and multi-camera association to create a unified 3D scene representation for LoS audits. Unlike prior work that focuses on either static reconstruction or dynamic tracking, we explicitly separate and fuse both for accurate visibility analysis.
+Recent advances have unified pose estimation and reconstruction. DUSt3R~\cite{dust3r} uses a transformer architecture to jointly estimate camera poses and dense point maps from uncalibrated image pairs, enabling reconstruction from casually captured images. MASt3R~\cite{mast3r} extends this with improved matching. Pi3~\cite{pi3} further advances multi-view reconstruction with enhanced global optimization. We adopt Pi3 for its strong performance on outdoor multi-view scenarios without requiring pre-calibrated cameras.
+
+Neural radiance fields (NeRF)~\cite{mildenhall2020nerf} and 3D Gaussian Splatting~\cite{kerbl3Dgaussians} enable high-quality novel view synthesis but require extensive per-scene optimization and are primarily designed for static scenes.
+
+\subsection{Object Detection and Multi-Object Tracking}
+
+Modern object detectors achieve real-time performance with high accuracy. The YOLO family~\cite{redmon2016yolo} has evolved through multiple versions, with YOLOv8~\cite{yolov8} achieving state-of-the-art speed-accuracy trade-offs. Transformer-based detectors like DETR~\cite{carion2020detr} and its variants offer end-to-end detection but with higher computational cost.
+
+Multi-object tracking (MOT) maintains object identities across video frames. Tracking-by-detection approaches associate detections across frames using appearance and motion cues. SORT~\cite{bewley2016sort} uses Kalman filtering and Hungarian matching for efficient online tracking. DeepSORT~\cite{wojke2017deepsort} adds appearance features for improved re-identification. ByteTrack~\cite{bytetrack} achieves state-of-the-art performance by associating every detection box, including low-confidence ones, effectively recovering objects through occlusions. We adopt ByteTrack for its robustness to partial occlusions common at intersections.
+
+\subsection{Monocular Depth Estimation}
+
+Monocular depth estimation predicts depth from single images. Early learning-based methods~\cite{eigen2014depth} used CNNs trained on ground-truth depth. Recent approaches leverage large-scale training with relative depth supervision. MiDaS~\cite{ranftl2020midas} trains on diverse datasets for zero-shot generalization. Depth Anything~\cite{depthanything} scales training data to 62M images, achieving strong generalization. Depth Anything V2~\cite{depthanythingv2} further improves with synthetic data and enhanced architectures. We use Depth Anything V2 to enhance 3D localization accuracy when projecting 2D detections.
+
+\subsection{Semantic Segmentation}
+
+Semantic segmentation assigns class labels to each pixel. FCN~\cite{long2015fcn} introduced fully convolutional networks for dense prediction. DeepLab variants~\cite{chen2017deeplab,chen2018deeplabv3plus} use atrous convolutions and spatial pyramid pooling. Transformer-based methods like SegFormer~\cite{segformer} achieve strong performance with efficient hierarchical architectures. We employ SegFormer trained on Cityscapes~\cite{cityscapes} to identify road and sidewalk regions for ground plane estimation.
+
+\subsection{Multi-Camera Tracking and 3D Localization}
+
+Multi-camera tracking extends single-camera MOT to associate objects across overlapping views. Graph-based methods~\cite{ristani2018features} model cross-camera associations as graph matching problems. Recent approaches leverage 3D geometry for improved association~\cite{xu2016multi}. Our work differs by focusing on 3D localization for visibility analysis rather than re-identification, using spatial-temporal clustering with ground plane projection for cross-camera association.

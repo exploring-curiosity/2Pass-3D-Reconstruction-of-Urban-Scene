@@ -1,0 +1,150 @@
+{
+  "total_frames": 451,
+  "fps": 14.402503672478764,
+  "tracks": [
+    {
+      "id": 8,
+      "class": "truck",
+      "is_stationary": false,
+      "length": 64
+    },
+    {
+      "id": 1,
+      "class": "car",
+      "is_stationary": true,
+      "length": 85
+    },
+    {
+      "id": 4,
+      "class": "car",
+      "is_stationary": true,
+      "length": 140
+    },
+    {
+      "id": 10,
+      "class": "car",
+      "is_stationary": true,
+      "length": 122
+    },
+    {
+      "id": 11,
+      "class": "person",
+      "is_stationary": true,
+      "length": 67
+    },
+    {
+      "id": 21,
+      "class": "person",
+      "is_stationary": false,
+      "length": 110
+    },
+    {
+      "id": 40,
+      "class": "bicycle",
+      "is_stationary": false,
+      "length": 63
+    },
+    {
+      "id": 48,
+      "class": "person",
+      "is_stationary": false,
+      "length": 89
+    },
+    {
+      "id": 50,
+      "class": "car",
+      "is_stationary": false,
+      "length": 73
+    },
+    {
+      "id": 57,
+      "class": "bicycle",
+      "is_stationary": false,
+      "length": 83
+    },
+    {
+      "id": 66,
+      "class": "car",
+      "is_stationary": false,
+      "length": 80
+    },
+    {
+      "id": 77,
+      "class": "car",
+      "is_stationary": true,
+      "length": 148
+    },
+    {
+      "id": 90,
+      "class": "car",
+      "is_stationary": true,
+      "length": 74
+    },
+    {
+      "id": 99,
+      "class": "car",
+      "is_stationary": false,
+      "length": 129
+    },
+    {
+      "id": 105,
+      "class": "car",
+      "is_stationary": true,
+      "length": 66
+    },
+    {
+      "id": 104,
+      "class": "truck",
+      "is_stationary": true,
+      "length": 261
+    },
+    {
+      "id": 124,
+      "class": "car",
+      "is_stationary": false,
+      "length": 123
+    },
+    {
+      "id": 126,
+      "class": "car",
+      "is_stationary": true,
+      "length": 138
+    },
+    {
+      "id": 130,
+      "class": "car",
+      "is_stationary": false,
+      "length": 114
+    },
+    {
+      "id": 131,
+      "class": "car",
+      "is_stationary": true,
+      "length": 113
+    },
+    {
+      "id": 133,
+      "class": "car",
+      "is_stationary": true,
+      "length": 155
+    },
+    {
+      "id": 137,
+      "class": "person",
+      "is_stationary": true,
+      "length": 68
+    },
+    {
+      "id": 140,
+      "class": "car",
+      "is_stationary": true,
+      "length": 67
+    },
+    {
+      "id": 146,
+      "class": "car",
+      "is_stationary": true,
+      "length": 70
+    }
+  ]
+}

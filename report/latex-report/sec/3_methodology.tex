@@ -1,54 +1,216 @@
 \section{Method}
 \label{sec:method}
-Our system processes multi-camera synchronized video from a 4-corner intersection to reconstruct static and dynamic 3D scene elements for Line-of-Sight visibility analysis. Figure~[3] illustrates the complete pipeline.
-% Figure 3: Method pipeline diagram will be inserted here
-\subsection{\green{Pass 1: Static Scene Reconstruction}}
-\green{We extract static background images per camera via temporal median filtering and apply DUSt3R~\cite{dust3r} for multi-view geometry estimation. DUSt3R jointly optimizes camera poses and produces a dense global point cloud in a shared world frame with consistent camera intrinsics and extrinsics. This provides the geometric foundation for projecting 2D detections to 3D.}
-\begin{figure}[h!]
+
+Our system processes synchronized multi-camera video from an urban intersection through a two-pass pipeline: (1) static scene reconstruction to establish world geometry and camera parameters, and (2) dynamic object detection, tracking, and 3D localization. Figure~\ref{fig:pipeline} illustrates the complete architecture.
+
+% TODO: Add pipeline figure
+% Screenshot location: Create a diagram showing the two-pass pipeline
+% Save as: assets/pipeline_overview.png
+
+\begin{figure*}[t]
     \centering
-    \includegraphics[width=0.8\linewidth]{assets/Static_background.png}
-    \caption{Static background without any moving vehicles or pedestrians}
-    \label{fig:static_reconstruction}
-\end{figure}
-\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{assets/01_8_synchronized_cameras.png}
+    \caption{\textbf{Multi-camera input configuration.} Eight synchronized cameras capture the intersection from four corners, providing comprehensive coverage with overlapping fields of view. Each corner station contains two cameras (left and right) oriented to maximize crosswalk visibility.}
+    \label{fig:camera_setup}
+\end{figure*}
+
+%==============================================================================
+\subsection{Pass 1: Static Scene Reconstruction}
+\label{sec:pass1}
+%==============================================================================
+
+The first pass establishes a metrically consistent 3D representation of the static environment, including road surfaces, sidewalks, infrastructure, and parked vehicles. This geometric foundation is essential for accurate 2D-to-3D projection of dynamic objects in Pass 2.
+
+\subsubsection{Temporal Median Background Extraction}
+
+To isolate static scene elements from dynamic objects, we compute per-pixel temporal median images across the video sequence for each camera. Given a video sequence $\{I_t\}_{t=1}^{T}$ with $T$ frames, the background image $B$ is computed as:
+\begin{equation}
+    B(x, y) = \text{median}_{t \in [1, T]} \left( I_t(x, y) \right)
+\end{equation}
+
+This approach effectively removes transient objects (moving vehicles, pedestrians) while preserving static structures. We process 300 frames per camera at 10 FPS, providing 30 seconds of temporal coverage sufficient to eliminate most dynamic content.
+
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\linewidth]{assets/Dust3r_pointcloud.png}
-    \caption{DUSt3R 3D point cloud}
-    \label{fig:dust3r_pointcloud}
+    \includegraphics[width=0.95\linewidth]{assets/Static_background.png}
+    \caption{\textbf{Temporal median background extraction.} Static background image computed from 300 frames, effectively removing all moving vehicles and pedestrians while preserving road markings, infrastructure, and parked vehicles.}
+    \label{fig:static_background}
 \end{figure}
-\subsection{Pass 2: Dynamic Object Tracking}
-\subsubsection{\green{Per-Camera Detection and Tracking}}
-\green{For each camera independently, we apply YOLOv8x~\cite{yolov8} for object detection on pedestrian and vehicle classes. ByteTrack~\cite{bytetrack} maintains object identities across frames by associating detection boxes, including low-confidence detections to handle occlusions. For each track, we project the 2D bounding box bottom center to a 3D ground-contact point using camera parameters from Pass 1 and a RANSAC-fitted ground plane from the static point cloud. We accumulate 3D positions over time to create 3D trails and classify each track as stationary or moving based on 3D displacement thresholds and 2D motion variance. This produces per-camera motion summaries with track metadata and annotated visualization videos for all 8 cameras.}
-\begin{figure}[h!]
+
+\subsubsection{Multi-View Geometry Estimation with Pi3}
+
+We employ Pi3~\cite{pi3}, a state-of-the-art multi-view 3D reconstruction method that jointly estimates camera intrinsics, extrinsics, and dense point clouds from uncalibrated images. Unlike traditional Structure-from-Motion (SfM) pipelines that require explicit feature matching and bundle adjustment, Pi3 uses a transformer-based architecture to directly regress 3D geometry from image pairs.
+
+Given $N=8$ background images $\{B_i\}_{i=1}^{N}$, Pi3 processes all $\binom{N}{2} = 28$ image pairs and optimizes a global alignment that produces:
+\begin{itemize}
+    \item Camera intrinsic matrices $\{K_i\}_{i=1}^{N}$
+    \item Camera extrinsic matrices $\{[R_i | t_i]\}_{i=1}^{N}$ in a shared world frame
+    \item Dense point cloud $\mathcal{P} = \{(p_j, c_j)\}_{j=1}^{M}$ with 3D positions and RGB colors
+\end{itemize}
+
+The resulting point cloud contains approximately 1.2 million points with density exceeding 15,000 points/m$^2$ in the central intersection region.
+
+\begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\linewidth]{assets/object_tracking.png}
-    \caption{Object tracking per camera}
-    \label{fig:object_tracking}
+    \includegraphics[width=0.95\linewidth]{assets/03_3d_point_cloud.png}
+    \caption{\textbf{Dense 3D point cloud from Pi3.} Multi-view reconstruction produces a geometrically consistent point cloud of the intersection with accurate camera pose estimation for all 8 views.}
+    \label{fig:point_cloud}
 \end{figure}
-\subsubsection{\red{Multi-Camera Association}}
-\red{To merge tracks across cameras viewing the same object, we will aggregate all per-camera tracks and perform multi-camera association using union-find clustering. Two tracks will be merged if they satisfy: (1) same category (person/vehicle), (2) 3D spatial proximity ($\leq$2.0m for vehicles, $\leq$1.0m for persons), and (3) temporal overlap ($\geq$0.3s absolute and $\geq$30\% relative). Each cluster will represent one global object instance with a unique ID across all camera views.}
-\subsubsection{\red{Canonical Primitive Representation}}
-\red{Each global object is represented as a canonical 3D primitive in the DUSt3R world frame.}
 
-\red{\textbf{Vehicles:} Unlike standard axis-aligned bounding boxes (AABB) which significantly overestimate volume during turns, we utilize Motion-Oriented Bounding Boxes (OBB). We initialize a canonical box centered at the track position and rotate it to align with the track's smoothed 3D velocity vector. This ensures the primitive fits the vehicle's actual heading, preventing false occlusion detection at intersection corners. Class-specific dimensions are used (e.g., car: 4.5$\times$1.8$\times$1.5m, truck: 8.0$\times$2.5$\times$3.0m).}
+\subsubsection{Ground Plane Estimation and Metric Calibration}
 
-\red{\textbf{Pedestrians:} Represented as vertical cylinders (radius 0.4m, height 1.7m) centered at the track coordinate.}
+To enable accurate projection of 2D detections to 3D world coordinates, we estimate the ground plane from the reconstructed point cloud using RANSAC-based plane fitting. We first apply semantic segmentation using SegFormer~\cite{segformer} trained on Cityscapes~\cite{cityscapes} to identify road and sidewalk regions in each camera view. Points projecting to these semantic regions are used as inliers for robust plane estimation:
+\begin{equation}
+    \pi: ax + by + cz + d = 0, \quad \text{s.t.} \quad a^2 + b^2 + c^2 = 1
+\end{equation}
 
-\red{Centers are computed as the mean of member track 3D positions. This representation enables efficient ray-geometry intersection testing for LoS analysis.}
+Since Pi3 outputs geometry in arbitrary scale, we recover metric scale using known physical dimensions. We measure the width of standard crosswalk stripes (typically 0.3m) and vehicle dimensions visible in the scene to compute a scale factor $S$ that transforms the point cloud to real-world meters.
 
-\subsection{\red{Pass 3: Line-of-Sight Audit}}
-\red{For visibility analysis, we implement a ray-casting pipeline that determines precisely when an approaching vehicle becomes visible to a pedestrian. To handle the complexity of dense point clouds and arbitrary metric scales, we employ spatial voxelization and biological scale calibration.}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{assets/07_segformer_road_curb.png}
+    \caption{\textbf{Semantic segmentation for ground plane estimation.} SegFormer predictions identify road (purple), sidewalk (pink), and curb regions across all camera views, providing robust inliers for RANSAC plane fitting.}
+    \label{fig:segformer}
+\end{figure}
 
-\subsubsection{\red{Scale Calibration and Spatial Indexing}}
-\red{Since DUSt3R outputs geometry in arbitrary units, we recover metric scale using a biological prior. We calculate the median height of high-confidence pedestrian tracks in the unscaled space and compute a scale factor $S$ to anchor this median to 1.7m (average human height). This aligns the entire scene to real-world dimensions without relying on potentially degraded road markings.}
+%==============================================================================
+\subsection{Pass 2: Dynamic Object Detection and Tracking}
+\label{sec:pass2}
+%==============================================================================
 
-\red{To make ray-casting computationally feasible against a dense point cloud (15k points/m$^2$), we downsample the static scene into a Voxel Grid (20cm leaf size). This creates a lightweight occupancy map that preserves major occluders (poles, parked trucks) while significantly accelerating intersection testing.}
+The second pass processes the full video sequences to detect, track, and localize dynamic objects (vehicles and pedestrians) in 3D world coordinates using the camera parameters and ground plane from Pass 1.
 
-\subsubsection{\red{Visibility Scoring}}
-\red{We define visibility not as a binary state, but as a confidence score. For each pedestrian-vehicle pair:}
+\subsubsection{Object Detection with YOLOv8}
+
+We employ YOLOv8x~\cite{yolov8}, the largest variant of the YOLO family, for real-time object detection. The model is applied to each camera stream independently, detecting objects in the following categories: \texttt{person}, \texttt{bicycle}, \texttt{car}, \texttt{motorcycle}, \texttt{bus}, \texttt{truck}.
+
+For each detection, we extract:
+\begin{itemize}
+    \item Bounding box coordinates $(x_1, y_1, x_2, y_2)$
+    \item Class label $c \in \mathcal{C}$
+    \item Confidence score $s \in [0, 1]$
+\end{itemize}
+
+We apply a confidence threshold of $\tau = 0.25$ to balance recall and precision, as lower-confidence detections are valuable for tracking through occlusions.
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=\textwidth]{assets/06_yolov8_detection.png}
+    \caption{\textbf{YOLOv8x detection results.} High-confidence detections of vehicles and pedestrians across multiple camera views. The detector achieves $>$95\% recall on visible objects with real-time inference at 30+ FPS.}
+    \label{fig:yolo_detection}
+\end{figure*}
+
+\subsubsection{Multi-Object Tracking with ByteTrack}
+
+To maintain consistent object identities across frames, we employ ByteTrack~\cite{bytetrack}, a state-of-the-art multi-object tracking algorithm. ByteTrack's key innovation is associating \emph{every} detection box, including low-confidence ones, which significantly improves tracking through occlusions.
+
+The tracking pipeline operates as follows:
+\begin{enumerate}
+    \item \textbf{High-confidence matching:} Associate detections with $s > \tau_{\text{high}} = 0.6$ to existing tracks using IoU-based Hungarian matching
+    \item \textbf{Low-confidence recovery:} Match remaining detections with $s > \tau_{\text{low}} = 0.1$ to unmatched tracks, recovering occluded objects
+    \item \textbf{Track management:} Initialize new tracks for unmatched high-confidence detections; terminate tracks after $T_{\text{lost}} = 30$ frames without association
+\end{enumerate}
+
+This produces per-camera track sequences $\mathcal{T}_i = \{(t, \text{id}, \text{bbox}, \text{class})\}$ for each camera $i$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{assets/object_tracking.png}
+    \caption{\textbf{ByteTrack multi-object tracking.} Consistent track IDs are maintained across frames despite partial occlusions and varying detection confidence. Colored bounding boxes indicate unique track identities.}
+    \label{fig:tracking}
+\end{figure}
+
+\subsubsection{Monocular Depth Estimation with Depth Anything V2}
+
+To enhance 3D localization accuracy, we employ Depth Anything V2~\cite{depthanything}, a state-of-the-art monocular depth estimation model. For each frame, we predict dense relative depth maps that provide per-pixel depth ordering information.
+
+% TODO: Add depth estimation figure
+% Screenshot location: Open the 3D viewer showing depth colormap overlay
+% File: outputs/pass2_dynamic_v3/ depth visualization
+% Save as: assets/depth_estimation.png
+
+The depth predictions are used to:
+\begin{itemize}
+    \item Resolve depth ambiguities when projecting 2D detections to 3D
+    \item Provide relative ordering of overlapping objects
+    \item Improve ground contact point estimation for partially occluded objects
+\end{itemize}
+
+\subsubsection{2D to 3D Projection}
+
+Given a 2D bounding box detection, we project the bottom-center point (ground contact) to 3D world coordinates using the camera parameters from Pass 1 and the estimated ground plane.
+
+For a 2D point $(u, v)$ in camera $i$, the corresponding 3D ray is:
+\begin{equation}
+    \mathbf{r}(t) = \mathbf{o}_i + t \cdot K_i^{-1} \begin{bmatrix} u \\ v \\ 1 \end{bmatrix}
+\end{equation}
+where $\mathbf{o}_i$ is the camera center. The 3D ground contact point is the intersection of this ray with the ground plane $\pi$:
+\begin{equation}
+    \mathbf{p}_{\text{3D}} = \mathbf{r}(t^*), \quad t^* = -\frac{\mathbf{n} \cdot \mathbf{o}_i + d}{\mathbf{n} \cdot (K_i^{-1} [u, v, 1]^T)}
+\end{equation}
+where $\mathbf{n} = [a, b, c]^T$ is the ground plane normal.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{assets/02_camera_calibration_fov.png}
+    \caption{\textbf{Camera calibration and field-of-view visualization.} Recovered camera poses and viewing frustums from Pi3, showing the overlapping coverage of the intersection from 8 synchronized views.}
+    \label{fig:camera_fov}
+\end{figure}
+
+\subsubsection{Multi-Camera Track Association}
+
+To merge tracks of the same physical object observed across multiple cameras, we perform multi-camera association using spatial-temporal clustering. Two tracks $\mathcal{T}_i^a$ and $\mathcal{T}_j^b$ from cameras $i$ and $j$ are merged if they satisfy:
 
 \begin{enumerate}
-    \item \red{\textbf{Ray Bundle Casting:} We cast rays from the pedestrian's eye point (1.6m height) to $K=5$ keypoints on the vehicle (bumper center, headlights, hood, roof).}
-    \item \red{\textbf{Visibility Score ($V_t$):} A vehicle is classified as \textit{Visible} only if $>60\%$ of rays reach the target without intersecting occupied voxels or other dynamic primitives.}
-    \item \red{\textbf{Occluder Identification:} For each blocked ray, we identify whether the occlusion is caused by static infrastructure (poles, signs), parked vehicles, or moving vehicles, enabling targeted safety recommendations.}
+    \item \textbf{Category consistency:} Same object class (vehicle or pedestrian)
+    \item \textbf{Spatial proximity:} 3D distance $< \delta_{\text{spatial}}$ (2.0m for vehicles, 1.0m for pedestrians)
+    \item \textbf{Temporal overlap:} Overlapping time interval $\geq 0.3$s and $\geq 30\%$ relative overlap
 \end{enumerate}
+
+We use union-find clustering to transitively merge all associated tracks, producing global object identities $\mathcal{G} = \{g_k\}$ where each $g_k$ contains all track observations of a single physical object.
+
+\subsubsection{Canonical 3D Primitive Representation}
+
+Each global object is represented as a canonical 3D primitive in the world coordinate frame, enabling efficient ray-geometry intersection for visibility analysis.
+
+\textbf{Vehicles} are represented as oriented bounding boxes (OBB) aligned with the object's motion direction. Unlike axis-aligned bounding boxes (AABB) that overestimate volume during turns, OBBs accurately capture the vehicle's footprint:
+\begin{equation}
+    \text{OBB}_k = (\mathbf{c}_k, \mathbf{R}_k, \mathbf{d}_k)
+\end{equation}
+where $\mathbf{c}_k$ is the center position, $\mathbf{R}_k$ is the rotation matrix aligned with velocity, and $\mathbf{d}_k$ are class-specific dimensions (car: $4.5 \times 1.8 \times 1.5$m, truck: $7.0 \times 2.5 \times 3.0$m, bus: $12.0 \times 2.5 \times 3.2$m).
+
+\textbf{Pedestrians} are represented as vertical cylinders:
+\begin{equation}
+    \text{Cyl}_k = (\mathbf{c}_k, r=0.25\text{m}, h=1.7\text{m})
+\end{equation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\linewidth]{assets/09_4d_scene_output.png}
+    \caption{\textbf{4D scene with canonical primitives.} Reconstructed static scene with dynamic objects represented as oriented bounding boxes (vehicles) and cylinders (pedestrians) at a single time instant.}
+    \label{fig:4d_scene}
+\end{figure}
+
+\subsubsection{Motion Classification}
+
+Each tracked object is classified as \textit{stationary} or \textit{moving} based on its 3D trajectory statistics:
+\begin{equation}
+    \text{class} = \begin{cases}
+        \text{stationary} & \text{if } \sigma(\mathbf{p}) < \epsilon_\sigma \text{ and } \Delta_{\max} < \epsilon_\Delta \\
+        \text{moving} & \text{otherwise}
+    \end{cases}
+\end{equation}
+where $\sigma(\mathbf{p})$ is the standard deviation of 3D positions, $\Delta_{\max}$ is the maximum displacement, and $\epsilon_\sigma = 0.5$m, $\epsilon_\Delta = 1.0$m are empirically determined thresholds.
+
+This classification enables separate handling of parked vehicles (potential static occluders) and moving traffic (dynamic visibility hazards).
+
+%==============================================================================
+\subsection{Implementation Details}
+\label{sec:implementation}
+%==============================================================================
+
+\textbf{Hardware:} All experiments are conducted on a workstation with an NVIDIA RTX 4090 GPU (24GB VRAM), Intel i9-13900K CPU, and 64GB RAM.
+
+\textbf{Software:} We implement our pipeline in Python using PyTorch~\cite{pytorch}. Pi3 reconstruction uses the official implementation with default hyperparameters. YOLOv8x detection runs at 30+ FPS per camera. ByteTrack operates in real-time with negligible overhead. Depth Anything V2 uses the ViT-Large backbone for optimal accuracy.
+
+\textbf{Data:} We process 8 synchronized video streams at 1920$\times$1080 resolution and 30 FPS. Each video contains approximately 9,000 frames (5 minutes of footage) capturing typical intersection traffic patterns.
