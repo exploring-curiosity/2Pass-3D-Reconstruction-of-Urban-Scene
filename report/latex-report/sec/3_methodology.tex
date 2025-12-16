@@ -62,18 +62,30 @@
     \label{fig:4d_reconstruction}
 \end{figure}
 
-\subsection{Pass 3: Line-of-Sight Audit}
-For visibility analysis, we implement a ray-casting pipeline that determines precisely when an approaching vehicle becomes visible to a pedestrian. To handle the complexity of dense point clouds and arbitrary metric scales, we employ spatial voxelization and biological scale calibration.
+\subsection{\green{Pass 3: Line-of-Sight Audit}}
+\green{For visibility analysis, we implement a ray-casting pipeline that determines precisely when an approaching vehicle becomes visible to a pedestrian. The pipeline processes a colored point cloud where dynamic objects (pedestrians, vehicles) are distinguished from static infrastructure via RGB color coding. To handle the complexity of dense point clouds and arbitrary metric scales, we employ scene segmentation, spatial voxelization, and biological scale calibration.}
 
-\subsubsection{Scale Calibration and Spatial Indexing}
-Since Pi3 outputs geometry in arbitrary units, we recover metric scale using a biological prior. We calculate the median height of high-confidence pedestrian tracks in the unscaled space and compute a scale factor $S$ to anchor this median to 1.7m (average human height). This aligns the entire scene to real-world dimensions without relying on potentially degraded road markings.
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.85\linewidth]{assets/bev_combined.png}
+    \caption{\green{Bird's-eye view visualization of line-of-sight analysis showing visibility rays from pedestrians to vehicles. Green rays indicate clear LOS ($\geq$60\% visibility), orange indicates partial visibility (40-60\%), and red indicates occluded paths ($<$40\%).}}
+    \label{fig:los_bev}
+\end{figure}
 
-To make ray-casting computationally feasible against a dense point cloud (15k points/m$^2$), we downsample the static scene into a Voxel Grid (20cm leaf size). This creates a lightweight occupancy map that preserves major occluders (poles, parked trucks) while significantly accelerating intersection testing.
+\subsubsection{\green{Scene Segmentation and Scale Calibration}}
+\green{The input point cloud contains color-coded objects: pedestrians (blue), cars (red), trucks (green), and cycles (pink). We segment the scene by computing Euclidean distance in RGB space to reference colors, classifying points within a tolerance threshold ($\delta < 0.15$). Points not matching any dynamic object color are classified as static infrastructure. Dynamic points are then clustered using DBSCAN (eps=1.0m for vehicles, 0.5m for pedestrians) to extract individual object instances.}
 
-\subsubsection{Visibility Scoring}
-We define visibility not as a binary state, but as a confidence score. For each pedestrian-vehicle pair:
+\green{Since Pi3 outputs geometry in arbitrary units, we recover metric scale using a biological prior. We compute the median height of pedestrian clusters (z-range) and calculate a scale factor $S = 1.7\text{m} / \text{median\_height}$ to anchor the median to 1.7m (average human height). This aligns the entire scene to real-world dimensions without relying on potentially degraded road markings.}
+
+\subsubsection{\green{Spatial Indexing for Ray Casting}}
+\green{To make ray-casting computationally feasible against a dense point cloud, we build two complementary occupancy structures: (1) a \textbf{Voxel Occupancy Grid} for static infrastructure with 20cm leaf size, creating a lightweight occupancy map that preserves major occluders (poles, parked trucks) while accelerating intersection testing; (2) \textbf{KD-tree structures} for each dynamic object cluster, enabling efficient proximity queries for ray-object intersections.}
+
+\subsubsection{\green{Visibility Scoring}}
+\green{We define visibility not as a binary state, but as a confidence score. For each pedestrian-vehicle pair:}
 \begin{enumerate}
-    \item \textbf{Ray Bundle Casting:} We cast rays from the pedestrian's eye point (1.6m height) to $K=5$ keypoints on the vehicle (bumper center, headlights, hood, roof).
-    \item \textbf{Visibility Score ($V_t$):} A vehicle is classified as \textit{Visible} only if $>60\%$ of rays reach the target without intersecting occupied voxels or other dynamic primitives.
-    \item \textbf{Occluder Identification:} For each blocked ray, we identify whether the occlusion is caused by static infrastructure (poles, signs), parked vehicles, or moving vehicles, enabling targeted safety recommendations.
+    \item \green{\textbf{Ray Bundle Casting:}} \green{We cast rays from the pedestrian's eye point (1.6m above ground) to $K=5$ keypoints on the vehicle: bumper center, left headlight, right headlight, hood center, and roof front. Each ray is marched with 10cm step size, checking intersections against both static voxels and dynamic object KD-trees.}
+    \item \green{\textbf{Visibility Score ($V_t$):}} \green{A vehicle is classified as \textit{Visible} only if $>60\%$ of rays reach the target without intersecting occupied voxels or other dynamic primitives (excluding the pedestrian and target vehicle themselves).}
+    \item \green{\textbf{Occluder Identification:}} \green{For each blocked ray, we identify whether the occlusion is caused by static infrastructure (poles, signs), parked vehicles (stationary objects), moving vehicles, or other pedestrians, enabling targeted safety recommendations. The primary occluder is determined by majority vote across blocked rays.}
 \end{enumerate}
+
+
