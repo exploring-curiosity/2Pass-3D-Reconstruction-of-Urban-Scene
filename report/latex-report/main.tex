@@ -3,9 +3,9 @@
 \documentclass[10pt,twocolumn,letterpaper]{article}
 
 %%%%%%%%% PAPER TYPE  - PLEASE UPDATE FOR FINAL VERSION
-\usepackage[review]{cvpr}              % To produce the standard CVPR format without review watermarks
-\usepackage{amsmath}      % To produce the REVIEW version
-% \usepackage[pagenumbers]{cvpr} % To force page numbers, e.g. for an arXiv version
+\usepackage{cvpr}              % Final version with author names visible (default)
+\usepackage{amsmath}
+% \usepackage[review]{cvpr} % Use this for anonymous review version
 \usepackage{graphicx}
 
 % Import additional packages in the preamble file, before hyperref
@@ -21,8 +21,8 @@
 \definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
 \usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
 
-%%%%%%%%% PAPER ID  - PLEASE UPDATE
-\def\paperID{*****} % *** Enter the Paper ID here
+%%%%%%%%% PAPER ID - keep for cvpr style compatibility
+\def\paperID{} 
 \def\confName{CVPR}
 \def\confYear{2026}
 
@@ -30,7 +30,13 @@
 \title{Two-Pass 3D Reconstruction for Line-of-Sight Audits at Crosswalks}
 
 %%%%%%%%% AUTHORS - PLEASE UPDATE
-\author{Anonymous Authors}
+\author{
+\blue{Sudharshan Ramesh}\textsuperscript{1} \and
+Tanvi \textsuperscript{1} \and
+Karthik \textsuperscript{1} \and
+Neha \textsuperscript{1} \and
+Asmitha\textsuperscript{1} \\
+}
 
 \begin{document}
 \maketitle
@@ -40,8 +46,6 @@
 \input{sec/2.5_data}
 \input{sec/3_methodology}
 \input{sec/4_experiments}
-\input{sec/5_conclusion}
-
 {
     \small
     \bibliographystyle{ieeenat_fullname}

@@ -1,50 +1,18 @@
 \section{Introduction}
 \label{sec:intro}
 
-Urban intersection safety critically depends on visibility between pedestrians and approaching vehicles. At crosswalks, pedestrians often face obstructed views due to parked cars, infrastructure elements, or other vehicles, creating serious safety hazards. In the United States, 7,388 pedestrians were killed in traffic crashes in 2021, with limited sight distance cited as a contributing factor in many cases~\cite{nhtsa2023pedestrian}. Traditional line-of-sight (LoS) audits rely on manual 2D analysis or simplified geometric rules that cannot capture the complex 3D occlusions arising from dynamic objects and multi-view perspectives.
-
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=\linewidth]{assets/Camera_Placement.png}
-    \caption{\textbf{System overview.} Eight synchronized cameras capture an urban intersection from four corners. Our two-pass pipeline reconstructs static scene geometry and tracks dynamic objects in 3D for automated line-of-sight visibility analysis.}
-    \label{fig:teaser}
-\end{figure}
-
 \subsection{Motivation}
-
-Existing approaches to intersection visibility analysis suffer from fundamental limitations:
-
-\begin{itemize}
-    \item \textbf{Manual audits} are time-consuming, subjective, and cannot capture temporal dynamics of moving traffic
-    \item \textbf{2D video analysis} cannot reason about 3D occlusions or depth relationships between objects
-    \item \textbf{Single-camera methods} have limited field of view and suffer from occlusion blind spots
-    \item \textbf{Static-only reconstruction} ignores the critical role of dynamic objects (moving vehicles, pedestrians) in creating visibility hazards
-\end{itemize}
-
-These limitations motivate our approach: a multi-camera 3D reconstruction system that captures both static scene geometry and dynamic object trajectories for comprehensive visibility analysis.
+Urban intersection safety critically depends on visibility between pedestrians and approaching vehicles. At crosswalks, pedestrians often face blocked views due to parked cars, infrastructure, or other vehicles, creating serious safety risks. In the United States, 7,388 pedestrians were killed in traffic crashes in 2021, with limited sight distance cited as a contributing factor~\cite{nhtsa2023pedestrian}. Traditional line-of-sight (LoS) audits rely on manual 2D analysis or simple geometric rules that cannot capture complex 3D occlusions from dynamic objects and multi-view perspectives.
 
 \subsection{Our Approach}
+We present a two-pass 3D reconstruction system that processes synchronized multi-camera video to create time-consistent scenes with both static geometry and tracked dynamic objects for automated LoS visibility audits. 
 
-We present a two-pass pipeline that processes synchronized multi-camera video to create time-consistent 3D scenes with both static geometry and tracked dynamic objects:
+\textbf{Pass 1 - Static Reconstruction:} We reconstruct the static scene using Pi3~\cite{pi3} to establish a shared world coordinate system and dense point cloud from 8 synchronized cameras at a 4-corner intersection.
 
-\textbf{Pass 1: Static Scene Reconstruction.} We extract static background images via temporal median filtering and employ Pi3~\cite{pi3} for multi-view geometry estimation. Pi3 jointly optimizes camera poses and produces a dense global point cloud in a shared world frame. We apply SegFormer~\cite{segformer} semantic segmentation to identify road and sidewalk regions for robust RANSAC ground plane fitting.
+\textbf{Pass 2 - Dynamic Tracking:} We track dynamic objects (pedestrians and vehicles) using YOLOv8x~\cite{yolov8} for detection and ByteTrack~\cite{bytetrack} for multi-object tracking. We perform per-camera tracking with stereo triangulation for 3D localization, classify objects as stationary vs. moving, and use Kalman filtering for smooth trajectories. Multi-camera association merges tracks across views using spatial proximity and temporal overlap. Each global object is represented as a canonical 3D primitive: oriented bounding boxes for vehicles, vertical cylinders for pedestrians.
 
-\textbf{Pass 2: Dynamic Object Tracking.} We detect objects using YOLOv8x~\cite{yolov8} and track them with ByteTrack~\cite{bytetrack} independently per camera. We project 2D detections to 3D world coordinates using camera parameters from Pass 1 and the estimated ground plane. Multi-camera track association merges observations across views, and each object is represented as a canonical 3D primitive: oriented bounding boxes for vehicles, vertical cylinders for pedestrians.
+\textbf{Pass 3 - LoS Audit:} We cast rays from pedestrian eye points to vehicles through the combined static + dynamic scene to determine visibility timing and identify occluders.
 
-\subsection{Contributions}
+The key insight is that combining multi-view static geometry with temporally consistent dynamic primitives provides more accurate visibility reasoning than any single-camera or 2D approach.
 
-Our main contributions are:
-
-\begin{enumerate}
-    \item A complete two-pass pipeline for multi-camera 3D reconstruction of urban intersections, combining static scene geometry with dynamic object tracking
-    
-    \item Integration of state-of-the-art components: Pi3 for uncalibrated multi-view reconstruction, YOLOv8x + ByteTrack for detection and tracking, and SegFormer for semantic segmentation
-    
-    \item Multi-camera track association using spatial-temporal clustering to maintain consistent object identities across views
-    
-    \item Canonical 3D primitive representation (oriented bounding boxes, cylinders) enabling efficient ray-geometry intersection for visibility analysis
-    
-    \item Comprehensive evaluation on a real urban intersection dataset with 8 synchronized cameras, demonstrating accurate reconstruction and tracking performance
-\end{enumerate}
-
-The key insight is that combining multi-view static geometry with temporally consistent dynamic primitives provides the foundation for accurate visibility reasoning that single-camera or 2D approaches cannot achieve.
+% Figure 1: Pipeline overview diagram will be inserted here

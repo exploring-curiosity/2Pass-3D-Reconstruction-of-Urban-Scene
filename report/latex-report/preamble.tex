@@ -5,12 +5,17 @@
 %% Inline annotations; for predefined colors, refer to "dvipsnames" in the xcolor package:
 %% https://tinyurl.com/overleaf-colors
 %%
-%% Disable color annotations for camera ready
-\newcommand{\red}[1]{#1}
-\newcommand{\green}[1]{#1}
-\newcommand{\todo}[1]{#1}
-\newcommand{\TODO}[1]{}
-\newcommand{\DONE}[1]{}
+\newcommand{\red}[1]{{\color{red}#1}}
+\newcommand{\green}[1]{{\color{ForestGreen}#1}}
+\newcommand{\blue}[1]{{\color{blue}#1}}
+\newcommand{\todo}[1]{{\color{red}#1}}
+\newcommand{\TODO}[1]{\textbf{\color{red}[TODO: #1]}}
+\newcommand{\DONE}[1]{\textbf{\color{ForestGreen}[DONE: #1]}}
+%%
+%% disable for camera ready / submission by uncommenting these lines  
+%%
+% \renewcommand{\TODO}[1]{}
+% \renewcommand{\todo}[1]{#1}
 
 %%
 %% work harder in optimizing text layout. Typically shrinks text by 1/6 of page, enable

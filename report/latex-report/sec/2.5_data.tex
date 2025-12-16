@@ -1,55 +1,21 @@
-\section{Dataset}
+\section{\blue{Data}}
 \label{sec:data}
 
-We evaluate our system on the StreetAware dataset~\cite{piadyk_2023_q1byv-qc065}, a high-resolution synchronized multimodal urban scene dataset captured at a real 4-corner traffic intersection in New York City. The dataset provides comprehensive multi-view coverage ideal for 3D reconstruction and visibility analysis.
+\blue{We use the StreetAware dataset~\cite{piadyk_2023_q1byv-qc065}, a high-resolution synchronized multimodal urban scene dataset captured at a real 4-corner traffic intersection. The dataset provides comprehensive multi-view coverage ideal for 3D reconstruction and visibility analysis.}
 
-\subsection{Camera Configuration}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\linewidth]{assets/Camera_Placement.png}
+    \caption{\blue{Camera placement indicated by green markers at the 4-corner traffic intersection}}
+    \label{fig:camera_setup}
+\end{figure}
 
-The dataset features 8 synchronized RGB cameras mounted at 4 corner positions, with 2 cameras per corner oriented to capture different viewing angles. This configuration provides:
+\subsection{\blue{Data Characteristics}}
+\blue{\textbf{Camera Setup:} 8 synchronized RGB cameras mounted at 4 corner positions (2 cameras per corner, forming stereo pairs) provide full 360-degree coverage of the intersection.}
 
-\begin{itemize}
-    \item \textbf{Full intersection coverage:} 360-degree visibility of all crosswalks and approaching traffic lanes
-    \item \textbf{Overlapping fields of view:} Multiple cameras observe the same regions, enabling multi-view reconstruction and cross-camera track association
-    \item \textbf{Diverse perspectives:} Each corner captures unique occlusion patterns and visibility conditions
-\end{itemize}
+\blue{\textbf{Synchronization:} All cameras are hardware-synchronized at 30 FPS, essential for stereo triangulation and multi-view 3D reconstruction.}
 
-\subsection{Technical Specifications}
+\blue{\textbf{Scene Complexity:} The intersection includes road surfaces, crosswalk markings, traffic signals, street furniture, parked vehicles, and moving traffic (cars, trucks, pedestrians, bicycles).}
 
-\begin{table}[h]
-\centering
-\caption{\textbf{StreetAware dataset specifications.}}
-\label{tab:data_specs}
-\begin{tabular}{ll}
-\toprule
-\textbf{Property} & \textbf{Value} \\
-\midrule
-Number of cameras & 8 \\
-Resolution & 1920 $\times$ 1080 \\
-Frame rate & 30 FPS \\
-Synchronization & Hardware-synchronized \\
-Duration & 5 minutes \\
-Total frames per camera & $\sim$9,000 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Scene Characteristics}
-
-The intersection includes diverse static and dynamic elements:
-
-\textbf{Static elements:} Road surfaces with lane markings, crosswalk stripes, sidewalks, curbs, traffic signals, street furniture (poles, signs, fire hydrants), building facades, and parked vehicles.
-
-\textbf{Dynamic elements:} Moving vehicles (cars, trucks, buses, bicycles) and pedestrians crossing at various times and locations. The dataset captures typical urban intersection activity with multiple simultaneous objects.
-
-\subsection{Data Processing Pipeline}
-
-We process the raw video through the following stages:
-
-\begin{enumerate}
-    \item \textbf{Background extraction:} Temporal median filtering over 300 frames per camera to isolate static scene elements
-    \item \textbf{Multi-view reconstruction:} Pi3 processing of 8 background images to establish world geometry and camera parameters
-    \item \textbf{Per-frame detection:} YOLOv8x inference on all video frames for object detection
-    \item \textbf{Tracking:} ByteTrack association to maintain object identities across frames
-    \item \textbf{3D projection:} Ground plane intersection to localize objects in world coordinates
-    \item \textbf{Multi-camera fusion:} Spatial-temporal clustering to merge tracks across views
-\end{enumerate}
+\subsection{\blue{Data Processing}}
+\blue{We extract static background frames via temporal median filtering over 300 frames to remove moving objects. For dynamic analysis, we leverage the stereo camera pairs at each corner for triangulation-based 3D localization, using Pi3-estimated camera parameters for projection.}
