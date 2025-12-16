@@ -1,11 +1,7 @@
 \section{Method}
 \label{sec:method}
 
-Our system processes synchronized multi-camera video from an urban intersection through a two-pass pipeline: (1) static scene reconstruction to establish world geometry and camera parameters, and (2) dynamic object detection, tracking, and 3D localization. Figure~\ref{fig:pipeline} illustrates the complete architecture.
-
-% TODO: Add pipeline figure
-% Screenshot location: Create a diagram showing the two-pass pipeline
-% Save as: assets/pipeline_overview.png
+Our system processes synchronized multi-camera video from an urban intersection through a two-pass pipeline: (1) static scene reconstruction to establish world geometry and camera parameters, and (2) dynamic object detection, tracking, and 3D localization.
 
 \begin{figure*}[t]
     \centering
@@ -119,22 +115,6 @@ This produces per-camera track sequences $\mathcal{T}_i = \{(t, \text{id}, \text
     \caption{\textbf{ByteTrack multi-object tracking.} Consistent track IDs are maintained across frames despite partial occlusions and varying detection confidence. Colored bounding boxes indicate unique track identities.}
     \label{fig:tracking}
 \end{figure}
-
-\subsubsection{Monocular Depth Estimation with Depth Anything V2}
-
-To enhance 3D localization accuracy, we employ Depth Anything V2~\cite{depthanything}, a state-of-the-art monocular depth estimation model. For each frame, we predict dense relative depth maps that provide per-pixel depth ordering information.
-
-% TODO: Add depth estimation figure
-% Screenshot location: Open the 3D viewer showing depth colormap overlay
-% File: outputs/pass2_dynamic_v3/ depth visualization
-% Save as: assets/depth_estimation.png
-
-The depth predictions are used to:
-\begin{itemize}
-    \item Resolve depth ambiguities when projecting 2D detections to 3D
-    \item Provide relative ordering of overlapping objects
-    \item Improve ground contact point estimation for partially occluded objects
-\end{itemize}
 
 \subsubsection{2D to 3D Projection}
 

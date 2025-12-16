@@ -29,7 +29,7 @@ We present a two-pass pipeline that processes synchronized multi-camera video to
 
 \textbf{Pass 1: Static Scene Reconstruction.} We extract static background images via temporal median filtering and employ Pi3~\cite{pi3} for multi-view geometry estimation. Pi3 jointly optimizes camera poses and produces a dense global point cloud in a shared world frame. We apply SegFormer~\cite{segformer} semantic segmentation to identify road and sidewalk regions for robust RANSAC ground plane fitting.
 
-\textbf{Pass 2: Dynamic Object Tracking.} We detect objects using YOLOv8x~\cite{yolov8} and track them with ByteTrack~\cite{bytetrack} independently per camera. Monocular depth estimation via Depth Anything V2~\cite{depthanything} enhances 3D localization accuracy. We project 2D detections to 3D world coordinates using camera parameters from Pass 1 and the estimated ground plane. Multi-camera track association merges observations across views, and each object is represented as a canonical 3D primitive: oriented bounding boxes for vehicles, vertical cylinders for pedestrians.
+\textbf{Pass 2: Dynamic Object Tracking.} We detect objects using YOLOv8x~\cite{yolov8} and track them with ByteTrack~\cite{bytetrack} independently per camera. We project 2D detections to 3D world coordinates using camera parameters from Pass 1 and the estimated ground plane. Multi-camera track association merges observations across views, and each object is represented as a canonical 3D primitive: oriented bounding boxes for vehicles, vertical cylinders for pedestrians.
 
 \subsection{Contributions}
 
@@ -38,7 +38,7 @@ Our main contributions are:
 \begin{enumerate}
     \item A complete two-pass pipeline for multi-camera 3D reconstruction of urban intersections, combining static scene geometry with dynamic object tracking
     
-    \item Integration of state-of-the-art components: Pi3 for uncalibrated multi-view reconstruction, YOLOv8x + ByteTrack for detection and tracking, Depth Anything V2 for monocular depth, and SegFormer for semantic segmentation
+    \item Integration of state-of-the-art components: Pi3 for uncalibrated multi-view reconstruction, YOLOv8x + ByteTrack for detection and tracking, and SegFormer for semantic segmentation
     
     \item Multi-camera track association using spatial-temporal clustering to maintain consistent object identities across views
     

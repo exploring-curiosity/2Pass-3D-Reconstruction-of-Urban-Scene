@@ -1,7 +1,7 @@
 \section{Conclusion}
 \label{sec:conclusion}
 
-We presented a two-pass 3D reconstruction system for automated line-of-sight audits at urban intersections. Our approach combines static scene reconstruction using Pi3 with dynamic object detection and tracking using YOLOv8x, ByteTrack, and Depth Anything V2. The system processes synchronized multi-camera video to produce a unified 3D scene representation with both static geometry and tracked dynamic objects represented as canonical primitives.
+We presented a two-pass 3D reconstruction system for automated line-of-sight audits at urban intersections. Our approach combines static scene reconstruction using Pi3 with dynamic object detection and tracking using YOLOv8x and ByteTrack. The system processes synchronized multi-camera video to produce a unified 3D scene representation with both static geometry and tracked dynamic objects represented as canonical primitives.
 
 \textbf{Key findings:}
 \begin{itemize}
@@ -9,7 +9,7 @@ We presented a two-pass 3D reconstruction system for automated line-of-sight aud
     \item SegFormer semantic segmentation enables robust ground plane estimation for accurate 2D-to-3D projection
     \item ByteTrack maintains stable object identities with low fragmentation ($<$5\%) through occlusions
     \item Multi-camera fusion improves track completeness from 67\% to 95\% compared to single-camera tracking
-    \item Sub-meter 3D localization accuracy (0.42m vehicles, 0.28m pedestrians) is achieved through depth-enhanced projection
+    \item Sub-meter 3D localization accuracy is achieved through ground plane projection with multi-camera fusion
 \end{itemize}
 
 \textbf{Limitations and future work:}

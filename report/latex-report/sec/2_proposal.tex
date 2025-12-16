@@ -19,10 +19,6 @@ Modern object detectors achieve real-time performance with high accuracy. The YO
 
 Multi-object tracking (MOT) maintains object identities across video frames. Tracking-by-detection approaches associate detections across frames using appearance and motion cues. SORT~\cite{bewley2016sort} uses Kalman filtering and Hungarian matching for efficient online tracking. DeepSORT~\cite{wojke2017deepsort} adds appearance features for improved re-identification. ByteTrack~\cite{bytetrack} achieves state-of-the-art performance by associating every detection box, including low-confidence ones, effectively recovering objects through occlusions. We adopt ByteTrack for its robustness to partial occlusions common at intersections.
 
-\subsection{Monocular Depth Estimation}
-
-Monocular depth estimation predicts depth from single images. Early learning-based methods~\cite{eigen2014depth} used CNNs trained on ground-truth depth. Recent approaches leverage large-scale training with relative depth supervision. MiDaS~\cite{ranftl2020midas} trains on diverse datasets for zero-shot generalization. Depth Anything~\cite{depthanything} scales training data to 62M images, achieving strong generalization. Depth Anything V2~\cite{depthanythingv2} further improves with synthetic data and enhanced architectures. We use Depth Anything V2 to enhance 3D localization accuracy when projecting 2D detections.
-
 \subsection{Semantic Segmentation}
 
 Semantic segmentation assigns class labels to each pixel. FCN~\cite{long2015fcn} introduced fully convolutional networks for dense prediction. DeepLab variants~\cite{chen2017deeplab,chen2018deeplabv3plus} use atrous convolutions and spatial pyramid pooling. Transformer-based methods like SegFormer~\cite{segformer} achieve strong performance with efficient hierarchical architectures. We employ SegFormer trained on Cityscapes~\cite{cityscapes} to identify road and sidewalk regions for ground plane estimation.

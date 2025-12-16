@@ -247,26 +247,6 @@ Figure~\ref{fig:qualitative_tracking} shows qualitative tracking results across 
 \label{sec:ablation}
 %==============================================================================
 
-\subsubsection{Effect of Depth Estimation}
-
-We compare 3D localization with and without Depth Anything V2:
-
-\begin{table}[h]
-\centering
-\caption{\textbf{Ablation: Effect of monocular depth estimation.}}
-\label{tab:ablation_depth}
-\begin{tabular}{lcc}
-\toprule
-\textbf{Configuration} & \textbf{Vehicle Error} & \textbf{Pedestrian Error} \\
-\midrule
-Ground plane only & 0.58m & 0.41m \\
-+ Depth Anything V2 & \textbf{0.42m} & \textbf{0.28m} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-Depth estimation reduces localization error by 28\% for vehicles and 32\% for pedestrians.
-
 \subsubsection{Effect of Multi-Camera Fusion}
 
 We compare single-camera tracking versus multi-camera fusion:
@@ -302,14 +282,13 @@ Multi-camera fusion dramatically improves track completeness (objects visible ac
 \midrule
 YOLOv8x detection (8 cameras) & 42ms \\
 ByteTrack association & 3ms \\
-Depth Anything V2 (8 cameras) & 156ms \\
 2D-to-3D projection & 1ms \\
 Multi-camera association & 8ms \\
 \midrule
-\textbf{Total (per frame)} & \textbf{210ms} \\
-\textbf{Throughput} & \textbf{4.8 FPS} \\
+\textbf{Total (per frame)} & \textbf{54ms} \\
+\textbf{Throughput} & \textbf{18.5 FPS} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-While not real-time, the system processes a 5-minute video in approximately 6 minutes, making it practical for offline safety audits.
+The system achieves near real-time performance, processing a 5-minute video in under 1 minute, making it practical for both offline safety audits and potential real-time monitoring applications.
