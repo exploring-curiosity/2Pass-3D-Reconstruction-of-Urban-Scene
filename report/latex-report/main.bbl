@@ -5,47 +5,34 @@
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
 
-\bibitem[{American Association of State Highway and Transportation
-  Officials}(2018)]{aashto2018greenbook}
+\bibitem[{American Association of State Highway and Transportation Officials}(2018)]{aashto2018greenbook}
 {American Association of State Highway and Transportation Officials}.
 \newblock \emph{A Policy on Geometric Design of Highways and Streets}.
 \newblock AASHTO, 7th edition, 2018.
 
 \bibitem[Lord and Bonneson(2007)]{lord2007safety}
 Dominique Lord and James~A. Bonneson.
-\newblock Safety impacts of signalized intersection design features: A
-  literature review.
-\newblock \emph{Transportation Research Record}, 2023\penalty0 (1):\penalty0
-  43--52, 2007.
+\newblock Safety impacts of signalized intersection design features: A literature review.
+\newblock \emph{Transportation Research Record}, 2023\penalty0 (1):\penalty0 43--52, 2007.
 
-\bibitem[Mildenhall et~al.(2020)Mildenhall, Srinivasan, Tancik, Barron,
-  Ramamoorthi, and Ng]{mildenhall2020nerf}
-Ben Mildenhall, Pratul~P. Srinivasan, Matthew Tancik, Jonathan~T. Barron, Ravi
-  Ramamoorthi, and Ren Ng.
-\newblock Nerf: Representing scenes as neural radiance fields for view
-  synthesis.
-\newblock In \emph{Proceedings of the European Conference on Computer Vision
-  (ECCV)}, pages 405--421, 2020.
+\bibitem[Mildenhall et~al.(2020)Mildenhall, Srinivasan, Tancik, Barron, Ramamoorthi, and Ng]{mildenhall2020nerf}
+Ben Mildenhall, Pratul~P. Srinivasan, Matthew Tancik, Jonathan~T. Barron, Ravi Ramamoorthi, and Ren Ng.
+\newblock Nerf: Representing scenes as neural radiance fields for view synthesis.
+\newblock In \emph{Proceedings of the European Conference on Computer Vision (ECCV)}, pages 405--421, 2020.
 
-\bibitem[{National Highway Traffic Safety
-  Administration}(2023)]{nhtsa2023pedestrian}
+\bibitem[{National Highway Traffic Safety Administration}(2023)]{nhtsa2023pedestrian}
 {National Highway Traffic Safety Administration}.
 \newblock Traffic safety facts: Pedestrians 2021 data, 2023.
 \newblock DOT HS 813 450.
 
-\bibitem[Piadyk et~al.(2023)Piadyk, Rulff, Brewer, Hosseini, Ozbay, Sankar, and
-  Chakradharand]{piadyk_2023_q1byv-qc065}
-Yurii Piadyk, Joao Rulff, Ethan Brewer, Maryam Hosseini, Kaan Ozbay, Murugan
-  Sankar, and Srimat Chakradharand.
-\newblock {StreetAware: A High-Resolution Synchronized Multimodal Urban Scene
-  Dataset}, 2023.
+\bibitem[Piadyk et~al.(2023)Piadyk, Rulff, Brewer, Hosseini, Ozbay, Sankar, and Chakradharand]{piadyk_2023_q1byv-qc065}
+Yurii Piadyk, Joao Rulff, Ethan Brewer, Maryam Hosseini, Kaan Ozbay, Murugan Sankar, and Srimat Chakradharand.
+\newblock {StreetAware: A High-Resolution Synchronized Multimodal Urban Scene Dataset}, 2023.
 
-\bibitem[Redmon et~al.(2016)Redmon, Divvala, Girshick, and
-  Farhadi]{redmon2016yolo}
+\bibitem[Redmon et~al.(2016)Redmon, Divvala, Girshick, and Farhadi]{redmon2016yolo}
 Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali Farhadi.
 \newblock You only look once: Unified, real-time object detection.
-\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and
-  Pattern Recognition (CVPR)}, pages 779--788, 2016.
+\newblock In \emph{Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 779--788, 2016.
 
 \bibitem[{Ultralytics}(2023)]{yolov8}
 {Ultralytics}.
@@ -55,38 +42,26 @@ Joseph Redmon, Santosh Divvala, Ross Girshick, and Ali Farhadi.
 \bibitem[Wang et~al.(2024)Wang, Leroy, Cabon, Chidlovskii, and Revaud]{dust3r}
 Shuzhe Wang, Vincent Leroy, Yohann Cabon, Boris Chidlovskii, and Jerome Revaud.
 \newblock Dust3r: Geometric 3d vision made easy.
-\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision
-  and Pattern Recognition (CVPR)}, pages 20697--20709, 2024.
+\newblock In \emph{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, pages 20697--20709, 2024.
 
-\bibitem[Wang et~al.(2025)Wang, Zhou, Zhu, Chang, Zhou, Li, Chen, Pang, Shen,
-  and He]{pi3}
-Yifan Wang, Jianjun Zhou, Haoyi Zhu, Wenzheng Chang, Yang Zhou, Zizun Li, Junyi
-  Chen, Jiangmiao Pang, Chunhua Shen, and Tong He.
-\newblock $\pi^3$: Scalable permutation-equivariant visual geometry learning,
-  2025.
+\bibitem[Wang et~al.(2025)Wang, Zhou, Zhu, Chang, Zhou, Li, Chen, Pang, Shen, and He]{pi3}
+Yifan Wang, Jianjun Zhou, Haoyi Zhu, Wenzheng Chang, Yang Zhou, Zizun Li, Junyi Chen, Jiangmiao Pang, Chunhua Shen, and Tong He.
+\newblock $\pi^3$: Scalable permutation-equivariant visual geometry learning, 2025.
 \newblock arXiv preprint arXiv:2507.13347v1.
 
-\bibitem[Xie et~al.(2021)Xie, Wang, Yu, Anandkumar, Alvarez, and
-  Luo]{segformer}
-Enze Xie, Wenhai Wang, Zhiding Yu, Anima Anandkumar, Jose~M. Alvarez, and Ping
-  Luo.
-\newblock Segformer: Simple and efficient design for semantic segmentation with
-  transformers.
-\newblock In \emph{Advances in Neural Information Processing Systems
-  (NeurIPS)}, pages 12077--12090, 2021.
+\bibitem[Xie et~al.(2021)Xie, Wang, Yu, Anandkumar, Alvarez, and Luo]{segformer}
+Enze Xie, Wenhai Wang, Zhiding Yu, Anima Anandkumar, Jose~M. Alvarez, and Ping Luo.
+\newblock Segformer: Simple and efficient design for semantic segmentation with transformers.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, pages 12077--12090, 2021.
 
 \bibitem[Yao et~al.(2018)Yao, Luo, Li, Fang, and Quan]{yao2018mvsnet}
 Yao Yao, Zixin Luo, Shiwei Li, Tian Fang, and Long Quan.
 \newblock Mvsnet: Depth inference for unstructured multi-view stereo.
-\newblock \emph{Proceedings of the European Conference on Computer Vision
-  (ECCV)}, pages 767--783, 2018.
+\newblock \emph{Proceedings of the European Conference on Computer Vision (ECCV)}, pages 767--783, 2018.
 
-\bibitem[Zhang et~al.(2022)Zhang, Sun, Jiang, Yu, Weng, Yuan, Luo, Liu, and
-  Wang]{bytetrack}
-Yifu Zhang, Peize Sun, Yi Jiang, Dongdong Yu, Fucheng Weng, Zehuan Yuan, Ping
-  Luo, Wenyu Liu, and Xinggang Wang.
+\bibitem[Zhang et~al.(2022)Zhang, Sun, Jiang, Yu, Weng, Yuan, Luo, Liu, and Wang]{bytetrack}
+Yifu Zhang, Peize Sun, Yi Jiang, Dongdong Yu, Fucheng Weng, Zehuan Yuan, Ping Luo, Wenyu Liu, and Xinggang Wang.
 \newblock Bytetrack: Multi-object tracking by associating every detection box.
-\newblock In \emph{Proceedings of the European Conference on Computer Vision
-  (ECCV)}, pages 1--21, 2022.
+\newblock In \emph{Proceedings of the European Conference on Computer Vision (ECCV)}, pages 1--21, 2022.
 
 \end{thebibliography}

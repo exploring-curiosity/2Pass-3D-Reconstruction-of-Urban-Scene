@@ -62,8 +62,52 @@
     \label{fig:4d_reconstruction}
 \end{figure}
 
+\subsection{\red{Gaussian Splatting}}
+\subsubsection{\red{Gaussian Splatting for Dense Scene Representation}}
+\red{
+To improve geometric completeness and rendering stability of the reconstructed scene, we augment our pipeline with Gaussian Splatting–based scene representations for both static and dynamic components. Gaussian splatting provides a continuous volumetric approximation of point-based geometry while remaining efficient for multi-view rendering and ray-based visibility analysis.}
+
+\subsubsection{\red{Gaussian Splatting for Static Scene Geometry}}
+\red{
+The dense static point cloud produced in Pass 1 (via Pi3) is converted into a Gaussian Splatting representation using a 3D Gaussian Splatting (3DGS) formulation. Each point is modeled as an anisotropic 3D Gaussian defined by a mean position, covariance, opacity, and color. This representation transforms the discrete point cloud into a smooth, continuous density field while preserving fine structural details of the intersection. Gaussian splatting offers several advantages for static scene modeling in our setting: Dense and continuous geometry: Road surfaces, curbs, poles, and parked vehicles are represented as continuous spatial densities rather than sparse points, reducing ray-miss artifacts during LoS analysis.
+Multi-view consistency: The Gaussian representation is optimized jointly across all views, yielding stable geometry aligned with the Pi3-estimated camera poses.
+Efficient rendering and intersection tests: Compared to mesh reconstruction, Gaussian splats avoid costly surface extraction while still enabling fast ray marching through volumetric density. The resulting static Gaussian scene acts as the primary environmental occlusion layer during visibility analysis and replaces direct point-wise intersection tests against the raw Pi3 point cloud.}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.85\linewidth]{assets/Gaussian.png}
+    \caption{\red{Camera positions and field-of-view coverage at the 4-corner intersection. Colored frustums show the overlapping views of the 8 synchronized cameras used for multi-view reconstruction. The resulting static scene point cloud is converted into a Gaussian Splatting (3DGS) representation, providing a dense and consistent geometric foundation for robust Line-of-Sight (LoS) visibility audits.}}
+    \label{fig:camera_fov_gaussian}
+\end{figure}
+
+
+
+\subsubsection{\red{Gaussian Splatting for Dynamic Objects}}
+\red{
+Dynamic objects reconstructed in Pass 2 are represented using Gaussian splatting in a complementary manner. For each tracked object (pedestrian or vehicle), we generate a local Gaussian splat representation aligned with its canonical 3D primitive:
+
+Vehicles: Gaussian distributions are initialized within oriented bounding boxes.
+
+Pedestrians: Gaussian distributions are initialized within vertical cylindrical volumes.
+
+For stationary objects, a single Gaussian cluster is instantiated and remains active for the object’s temporal span. For moving objects, Gaussian means are updated along the estimated 3D trajectory, producing a time-consistent sequence of splats that approximates object motion without requiring full per-frame mesh reconstruction. This hybrid design preserves the interpretability and robustness of primitive-based tracking while providing a volumetric occlusion model suitable for ray-based visibility reasoning.}
+
+\subsubsection{\red{Integration with Line-of-Sight Analysis}}
+\red{
+During Pass 3, ray-casting for Line-of-Sight audits is performed against a unified Gaussian scene composed of: Static Gaussian splats representing infrastructure and parked elements.Dynamic Gaussian splats representing pedestrians and vehicles. Rays cast from pedestrian eye points accumulate opacity as they traverse Gaussian densities. A ray is considered occluded when accumulated transmittance falls below a fixed threshold. Visibility scores are computed using the same multi-ray bundle strategy described earlier, but with Gaussian-based density integration instead of point-wise intersection checks. This formulation improves robustness in cluttered urban scenes by: Eliminating sensitivity to point cloud sparsity, Enabling smoother visibility transitions over time, Preserving occluder identity by associating Gaussian splats with object-level primitives.}
+
+\subsubsection{\red{Role of Gaussian Splatting in the Overall Pipeline}}
+\red{
+Gaussian splatting functions as a geometric representation layer, not a replacement for tracking or reconstruction. Pi3 provides the global world frame and static structure; YOLOv8x and ByteTrack provide dynamic object identities and trajectories; canonical primitives provide semantic abstraction; Gaussian splatting provides a dense, continuous spatial medium that enables reliable ray-based LoS auditing. This separation maintains modularity while improving the numerical stability and interpretability of visibility analysis at complex intersections.}
+
 \subsection{\green{Pass 3: Line-of-Sight Audit}}
 \green{For visibility analysis, we implement a ray-casting pipeline that determines precisely when an approaching vehicle becomes visible to a pedestrian. The pipeline processes a colored point cloud where dynamic objects (pedestrians, vehicles) are distinguished from static infrastructure via RGB color coding. To handle the complexity of dense point clouds and arbitrary metric scales, we employ scene segmentation, spatial voxelization, and biological scale calibration.}
+
+
+\subsubsection{\green{Scene Segmentation and Scale Calibration}}
+\green{The input point cloud contains color-coded objects: pedestrians (blue), cars (red), trucks (green), and cycles (pink). We segment the scene by computing Euclidean distance in RGB space to reference colors, classifying points within a tolerance threshold ($\delta < 0.15$). Points not matching any dynamic object color are classified as static infrastructure. Dynamic points are then clustered using DBSCAN (eps=1.0m for vehicles, 0.5m for pedestrians) to extract individual object instances.}
+
+\green{Since Pi3 outputs geometry in arbitrary units, we recover metric scale using a biological prior. We compute the median height of pedestrian clusters (z-range) and calculate a scale factor $S = 1.7\text{m} / \text{median\_height}$ to anchor the median to 1.7m (average human height). This aligns the entire scene to real-world dimensions without relying on potentially degraded road markings.}
 
 \begin{figure}[t]
     \centering
@@ -71,11 +115,6 @@
     \caption{\green{Bird's-eye view visualization of line-of-sight analysis showing visibility rays from pedestrians to vehicles. Green rays indicate clear LOS ($\geq$60\% visibility), orange indicates partial visibility (40-60\%), and red indicates occluded paths ($<$40\%).}}
     \label{fig:los_bev}
 \end{figure}
-
-\subsubsection{\green{Scene Segmentation and Scale Calibration}}
-\green{The input point cloud contains color-coded objects: pedestrians (blue), cars (red), trucks (green), and cycles (pink). We segment the scene by computing Euclidean distance in RGB space to reference colors, classifying points within a tolerance threshold ($\delta < 0.15$). Points not matching any dynamic object color are classified as static infrastructure. Dynamic points are then clustered using DBSCAN (eps=1.0m for vehicles, 0.5m for pedestrians) to extract individual object instances.}
-
-\green{Since Pi3 outputs geometry in arbitrary units, we recover metric scale using a biological prior. We compute the median height of pedestrian clusters (z-range) and calculate a scale factor $S = 1.7\text{m} / \text{median\_height}$ to anchor the median to 1.7m (average human height). This aligns the entire scene to real-world dimensions without relying on potentially degraded road markings.}
 
 \subsubsection{\green{Spatial Indexing for Ray Casting}}
 \green{To make ray-casting computationally feasible against a dense point cloud, we build two complementary occupancy structures: (1) a \textbf{Voxel Occupancy Grid} for static infrastructure with 20cm leaf size, creating a lightweight occupancy map that preserves major occluders (poles, parked trucks) while accelerating intersection testing; (2) \textbf{KD-tree structures} for each dynamic object cluster, enabling efficient proximity queries for ray-object intersections.}

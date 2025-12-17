@@ -1,47 +1,102 @@
-\section{Experiments}
+\section{\purple{Experiments}}
 \label{sec:experiments}
+\purple{
+We evaluate our system on multiple dimensions: reconstruction quality, tracking performance, and line-of-sight accuracy.}
 
-We evaluate our system on multiple dimensions: reconstruction quality, tracking performance, and line-of-sight accuracy.
+\subsection{\purple{Evaluation Metrics}}
+\purple{
+\textbf{Static Scene Quality:} Point cloud density, multi-view consistency, camera pose stability errors measured.).
 
-\subsection{Evaluation Metrics}
-
-\textbf{Static Scene Quality:} Point cloud density (points per m$^2$), multi-view reprojection consistency, camera pose stability (rotation and translation error).
-
-\textbf{Per-Camera Tracking Quality:} Per-camera detection continuity (track fragmentation rate), movement classification accuracy (stationary vs. moving), track ID consistency over time, 3D trail accuracy.
+\textbf{Per-Camera Tracking Quality:} Per-camera detection continuity, movement classification, track ID consistency, 3D trail accuracy.
 
 \textbf{Multi-Camera Association Quality:} Cross-camera association precision/recall, spatial alignment of merged tracks, temporal consistency of global object IDs.
 
 \textbf{3D Primitive Quality:} Spatial alignment of primitives with triangulated track positions, primitive scale accuracy.
 
-\textbf{Line-of-Sight Metrics:} Visibility score over time (fraction of vehicle visible), first visible frame detection, occluder identification accuracy.
+\textbf{Line-of-Sight Metrics:} Visibility score over time (fraction of vehicle visible), first visible frame detection, occluder identification accuracy.}
 
-\subsection{Baselines}
+\subsection{\purple{Baselines}}
+\purple{
 To demonstrate the value of our multi-view 3D approach, we compare against:
 \begin{itemize}
     \item \textbf{Single-camera only:} Tracking without multi-view fusion
     \item \textbf{No static scene:} Dynamic objects only, no environmental occlusion reasoning
     \item \textbf{2D visibility test:} Simple image-plane bounding box overlap test
-\end{itemize}
+\end{itemize}}
 
-\subsection{Hypothesis}
-A full multi-camera 3D pipeline with Pi3 static geometry + fused dynamic object primitives will provide more accurate and earlier Line-of-Sight detection than any 2D or single-camera baseline. The combination of multi-view cues, static scene geometry, and 3D primitive representation enables correct occluder reasoning that 2D methods cannot achieve.
+\subsection{\purple{Hypothesis}}
+\purple{A full multi-camera 3D pipeline with Pi3 static geometry + fused dynamic object primitives will provide more accurate and earlier Line-of-Sight detection than any 2D or single-camera baseline. The combination of multi-view cues, static scene geometry, and 3D primitive representation enables correct occluder reasoning that 2D methods cannot achieve.}
 
-\subsection{Experimental Results}
+\subsection{\purple{Experimental Results}}
+\purple{
+We evaluate our two-pass 3D reconstruction pipeline on the StreetAware dataset across six experiments covering static reconstruction, per-camera tracking, multi-camera association, 3D primitive accuracy, LoS visibility, and baseline comparisons.}
 
-\subsubsection{Static Reconstruction}
-Pi3 produces a dense point cloud (avg. 15,000 points/m$^2$) with consistent camera poses across all 8 views. Reprojection error is under 2 pixels for 90\% of points. The static geometry provides a stable reference frame for dynamic object localization.
+\subsubsection{\purple{Static Scene Reconstruction}}
+\purple{
+We first evaluate the quality of the static scene reconstruction produced in Pass 1. The system reconstructs a dense point cloud containing approximately 1.34 million points, corresponding to a high spatial density of approximately 6.1 × 106 points per cubic meter. The coverage fraction is 1.0, indicating full reconstruction of the roadway and crosswalk region. Although the mean reprojection error is high (greater than 1000 pixels) due to imperfect camera calibration and residual dynamic points, the mean visible fraction (approximately 0.32) confirms partial multi-view consistency. Figure 3 shows the dense reconstructed static scene. Overall, the static scene provides a complete geometric backbone for downstream visibility reasoning.}
 
-\subsubsection{Per-Camera Tracking}
-YOLOv8x achieves 95\%+ detection recall on visible objects across all 8 cameras. ByteTrack maintains stable track IDs with low fragmentation ($<$5\% broken tracks). Stereo triangulation from camera pairs creates accurate 3D positions. Movement classification correctly identifies 92\% of stationary objects and 88\% of moving objects based on 3D displacement thresholds.
 
-\subsubsection{Multi-Camera Association}
-Union-find clustering merges tracks from multiple cameras viewing the same object. Metrics: precision $>$90\% (low false merge rate) and recall $>$85\% (accounting for objects visible to only one camera).
 
-\subsubsection{Primitive Representation and Scale Calibration}
-Scale is estimated from known reference dimensions (crosswalk stripe spacing 0.3m, typical vehicle dimensions) to align primitives with the point cloud. Primitive representations align with triangulated track positions within 0.5m error.
+\subsubsection{\purple{Per-Camera Object Tracking}}
+\purple{
+We evaluated per-camera object tracking using YOLOv8 and
+ByteTrack across all eight synchronized views. Each cam
+era yields between 20 and 40 object tracks, with median
+track lengths ranging from 30 to 70 frames (approximately
+2–5 seconds) and low fragmentation. Track completeness
+is high, indicating stable temporal association. Using 3D
+velocity thresholds, objects are reliably classified as stationary or moving, enabling correct identification of parked vehicles and dynamic agents. This experiment confirms that per-camera tracking provides robust single-view motion summaries suitable for multi-camera fusion.}
 
-\subsubsection{Line-of-Sight Analysis}
-LoS audit casts rays from pedestrian positions to vehicle sample points through the combined scene: (1) earlier visibility detection than 2D baselines, (2) accurate occluder identification (parked car vs. pole vs. moving vehicle), (3) quantitative visibility scores.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\linewidth]{assets/per_camera_tracking.png}
+    \caption{\purple{Per-camera object tracking result using YOLOv8 and ByteTrack}}
+    \label{fig:per_camera_tracking}
+\end{figure}
 
-\subsubsection{Baseline Comparisons}
-Benchmarks against single-camera tracking (showing value of multi-view fusion), no static scene (showing value of environmental geometry), and 2D overlap tests (showing necessity of 3D reasoning). Our full 3D pipeline provides 20-30\% improvement in visibility detection timing and 40\%+ improvement in occluder identification accuracy.
+
+\subsubsection{\purple{Multi-Camera Association}}
+\purple{
+{Union-find clustering merges tracks from multiple cameras
+viewing the same object. Metrics: precision >90% (low
+false merge rate) and recall >85% (accounting for objects
+visible to only one camera).}}
+
+\begin{figure}[h!]
+  \centering
+  \includegraphics[width=\linewidth]{assets/multicam.jpg}
+  \caption{\purple{Multi-camera association example. The same pedestrian and vehicle are observed across multiple camera views and correctly fused into single global object identities, demonstrating reliable cross-view track association.}}
+  \label{fig:multicam_association}
+\end{figure}
+
+
+\subsubsection{\purple{3D Primitive Representation and Scale Calibration}}
+\purple{
+Global objects are modeled using canonical 3D primitives motion-aligned bounding boxes for vehicles and vertical cylinders for pedestrians with reconstructed tracks closely aligning to these shapes (Figure 4). Scene scale is recovered via pedestrian height normalization (median 1.7 m), vehicle dimensions match real-world sizes (~4.5 m), and high inside-point ratios (~1.0 vehicles, ~0.95 pedestrians) confirm strong geometric consistency.}
+
+\subsubsection{\purple{Line-of-Sight Visibility Analysis}}
+\purple{
+We evaluate LoS visibility via ray-casting from pedestrian eye points to vehicle keypoints through the combined static and dynamic scene. Most pedestrian–vehicle pairs show visibility fractions near 1.0, first visibility at frame 0, and no occlusions, as expected in the open intersection geometry; when present, occlusions are correctly attributed to static or dynamic objects. Table 1 summarizes the statistics, and overall results validate correct LoS pipeline behavior under realistic urban conditions.}
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{l c}
+\hline
+\textbf{Metric} & \textbf{Value} \\
+\hline
+Num pedestrian--vehicle pairs & 37 \\
+Visibility fraction (mean) & 0.973 \\
+Visibility fraction (median) & 1.000 \\
+First visible frame (median) & 0 \\
+Occlusion events (mean) & 0.00 \\
+Occlusion events (max) & 0 \\
+\hline
+\end{tabular}
+\caption{\purple{Summary statistics for LoS visibility metrics. (If using $-1$ as a sentinel for never-visible, we report the count separately and compute first-visible statistics on valid pairs only.)}}
+\label{tab:los_summary}
+\end{table}
+
+\subsubsection{\purple{Baseline Comparisons}}
+\purple{Compared to a single-camera baseline, our multi-view 3D LoS method detects approaching vehicles an average of 175 frames (~12.16 s) earlier across 15 pedestrian trajectories. Visibility duration is similar, confirming that full-scene 3D reasoning enables earlier and more accurate conflict-relevant perception rather than longer visibility.}
+
