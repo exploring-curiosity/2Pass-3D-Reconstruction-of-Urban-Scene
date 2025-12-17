@@ -1,0 +1,16 @@
+object_id,class_name,first_single,vis_single,first_2d,vis_2d,first_los,vis_los
+1,person,2,1.0,,,0,1.0
+3,person,96,1.0,,,-1,0.0
+4,person,102,1.0,,,0,1.0
+5,person,104,1.0,,,0,1.0
+6,person,117,1.0,,,0,1.0
+8,person,70,1.0,,,0,1.0
+9,person,86,1.0,,,0,1.0
+10,person,92,1.0,,,0,1.0
+14,person,56,1.0,,,0,1.0
+16,person,237,1.0,,,0,1.0
+17,person,339,1.0,,,0,1.0
+18,person,379,1.0,,,0,1.0
+19,person,387,1.0,,,0,1.0
+22,person,365,1.0,,,0,1.0
+24,person,116,1.0,,,0,1.0
