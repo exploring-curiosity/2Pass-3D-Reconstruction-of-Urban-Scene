@@ -208,6 +208,12 @@ INPUT ./sec/1_intro.tex
 INPUT ./sec/1_intro.tex
 INPUT ./sec/1_intro.tex
 INPUT sec/1_intro.tex
+INPUT ./assets/system_arch.png
+INPUT ./assets/system_arch.png
+INPUT ./assets/system_arch.png
+INPUT ./assets/system_arch.png
+INPUT ./assets/system_arch.png
+INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmr7t.tfm
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmb7t.tfm
 INPUT ./sec/2_proposal.tex
 INPUT ./sec/2_proposal.tex
@@ -230,6 +236,8 @@ INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmb.vf
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmr7t.vf
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmr8r.tfm
+INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmr7t.vf
+INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmr8r.tfm
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmb7t.vf
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmb8r.tfm
 INPUT ./sec/2.5_data.tex
@@ -240,7 +248,6 @@ INPUT ./assets/Camera_Placement.png
 INPUT ./assets/Camera_Placement.png
 INPUT ./assets/Camera_Placement.png
 INPUT ./assets/Camera_Placement.png
-INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmr7t.tfm
 INPUT ./sec/3_methodology.tex
 INPUT ./sec/3_methodology.tex
 INPUT ./sec/3_methodology.tex
@@ -266,12 +273,10 @@ INPUT ./assets/03_3d_point_cloud.png
 INPUT ./assets/03_3d_point_cloud.png
 INPUT ./assets/03_3d_point_cloud.png
 INPUT ./assets/03_3d_point_cloud.png
+INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmb.vf
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmbx10.tfm
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmbx7.tfm
 INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/public/cm/cmbx5.tfm
-INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmr7t.vf
-INPUT /usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/times/ptmr8r.tfm
-INPUT /usr/local/texlive/2024/texmf-dist/fonts/vf/adobe/times/ptmb.vf
 INPUT ./assets/object_tracking.png
 INPUT ./assets/object_tracking.png
 INPUT ./assets/object_tracking.png

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.26)  17 DEC 2025 12:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.26 (TeX Live 2024) (preloaded format=pdflatex 2024.9.26)  17 DEC 2025 13:06
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -413,15 +413,21 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 LaTeX Font Info:    Trying to load font information for U+msb on input line 43.
  (/usr/local/texlive/2024/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) (./sec/0_abstract.tex) (./sec/1_intro.tex) (./sec/2_proposal.tex [1{/usr/local/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/base/8r.enc}
+) (./sec/0_abstract.tex) (./sec/1_intro.tex
+<assets/system_arch.png, id=161, 1023.825pt x 316.18124pt>
+File: assets/system_arch.png Graphic file (type png)
+<use assets/system_arch.png>
+Package pdftex.def Info: assets/system_arch.png  used on input line 11.
+(pdftex.def)             Requested size: 237.13594pt x 73.23155pt.
+) (./sec/2_proposal.tex [1{/usr/local/texlive/2024/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/base/8r.enc}
 
 
-]) (./sec/2.5_data.tex
+ <./assets/system_arch.png>]) (./sec/2.5_data.tex
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 1.
 
-<assets/Camera_Placement.png, id=198, 1262.7175pt x 686.565pt>
+<assets/Camera_Placement.png, id=197, 1262.7175pt x 686.565pt>
 File: assets/Camera_Placement.png Graphic file (type png)
 <use assets/Camera_Placement.png>
 Package pdftex.def Info: assets/Camera_Placement.png  used on input line 8.
@@ -443,12 +449,12 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 6.
 
-<assets/Static_background.png, id=202, 855.195pt x 643.40375pt>
+<assets/Static_background.png, id=200, 855.195pt x 643.40375pt>
 File: assets/Static_background.png Graphic file (type png)
 <use assets/Static_background.png>
 Package pdftex.def Info: assets/Static_background.png  used on input line 11.
 (pdftex.def)             Requested size: 189.70947pt x 142.72736pt.
-<assets/03_3d_point_cloud.png, id=203, 903.375pt x 903.375pt>
+<assets/03_3d_point_cloud.png, id=201, 903.375pt x 903.375pt>
 File: assets/03_3d_point_cloud.png Graphic file (type png)
 <use assets/03_3d_point_cloud.png>
 Package pdftex.def Info: assets/03_3d_point_cloud.png  used on input line 18.
@@ -468,17 +474,16 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 28.
 
+[2 <./assets/Camera_Placement.png> <./assets/Static_background.png>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 35.
 
-[2 <./assets/Camera_Placement.png> <./assets/Static_background.png>]
-<assets/object_tracking.png, id=223, 1768.6075pt x 1320.935pt>
+<assets/object_tracking.png, id=220, 1768.6075pt x 1320.935pt>
 File: assets/object_tracking.png Graphic file (type png)
 <use assets/object_tracking.png>
 Package pdftex.def Info: assets/object_tracking.png  used on input line 40.
 (pdftex.def)             Requested size: 189.70947pt x 141.67525pt.
-
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 45.
@@ -487,12 +492,12 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 48.
 
-<assets/09_4d_scene_output.png, id=224, 903.375pt x 903.375pt>
+<assets/09_4d_scene_output.png, id=221, 903.375pt x 903.375pt>
 File: assets/09_4d_scene_output.png Graphic file (type png)
 <use assets/09_4d_scene_output.png>
 Package pdftex.def Info: assets/09_4d_scene_output.png  used on input line 53.
 (pdftex.def)             Requested size: 189.70947pt x 189.70056pt.
-<assets/4d_reconstruction_frame.png, id=225, 751.80875pt x 542.025pt>
+<assets/4d_reconstruction_frame.png, id=222, 751.80875pt x 542.025pt>
 File: assets/4d_reconstruction_frame.png Graphic file (type png)
 <use assets/4d_reconstruction_frame.png>
 Package pdftex.def Info: assets/4d_reconstruction_frame.png  used on input line 60.
@@ -505,16 +510,19 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 66.
 
+[3 <./assets/03_3d_point_cloud.png (PNG copy)> <./assets/object_tracking.png> <./assets/09_4d_scene_output.png (PNG copy)> <./assets/4d_reconstruction_frame.png>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 70.
 
-[3 <./assets/03_3d_point_cloud.png (PNG copy)> <./assets/object_tracking.png> <./assets/09_4d_scene_output.png (PNG copy)> <./assets/4d_reconstruction_frame.png>]
-<assets/Gaussian.png, id=236, 298.11375pt x 246.9225pt>
+<assets/Gaussian.png, id=235, 298.11375pt x 246.9225pt>
 File: assets/Gaussian.png Graphic file (type png)
 <use assets/Gaussian.png>
-Package pdftex.def Info: assets/Gaussian.png  used on input line 78.
+Package pdftex.def Info: assets/Gaussian.png  used on input line 76.
 (pdftex.def)             Requested size: 201.56699pt x 166.9556pt.
+
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 81.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
@@ -522,34 +530,25 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@ifnextchar' on input line 95.
+(hyperref)                removing `\@ifnextchar' on input line 89.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@ifnextchar' on input line 99.
+(hyperref)                removing `\@ifnextchar' on input line 93.
 
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@ifnextchar' on input line 103.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@ifnextchar' on input line 107.
-
-[4 <./assets/Gaussian.png>]
-<assets/bev_combined.png, id=243, 1146.9249pt x 856.8813pt>
+<assets/bev_combined.png, id=236, 1146.9249pt x 856.8813pt>
 File: assets/bev_combined.png Graphic file (type png)
 <use assets/bev_combined.png>
-Package pdftex.def Info: assets/bev_combined.png  used on input line 114.
+Package pdftex.def Info: assets/bev_combined.png  used on input line 100.
 (pdftex.def)             Requested size: 201.56699pt x 150.58406pt.
 
+Package hyperref Warning: Token not allowed in a PDF string (Unicode):
+(hyperref)                removing `\@ifnextchar' on input line 105.
+
+[4 <./assets/Gaussian.png>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@ifnextchar' on input line 119.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (Unicode):
-(hyperref)                removing `\@ifnextchar' on input line 122.
+(hyperref)                removing `\@ifnextchar' on input line 108.
 
 ) (./sec/4_experiments.tex
 
@@ -576,7 +575,6 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 30.
 
-[5 <./assets/bev_combined.png>]
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 34.
@@ -585,20 +583,25 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 40.
 
-<assets/per_camera_tracking.png, id=255, 269.3262pt x 359.4228pt>
+[5 <./assets/bev_combined.png>]
+<assets/per_camera_tracking.png, id=254, 269.3262pt x 359.4228pt>
 File: assets/per_camera_tracking.png Graphic file (type png)
 <use assets/per_camera_tracking.png>
 Package pdftex.def Info: assets/per_camera_tracking.png  used on input line 52.
 (pdftex.def)             Requested size: 142.283pt x 189.88441pt.
 
+
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 58.
 
-<assets/multicam.jpg, id=256, 999.735pt x 710.655pt>
+<assets/multicam.jpg, id=255, 999.735pt x 710.655pt>
 File: assets/multicam.jpg Graphic file (type jpg)
 <use assets/multicam.jpg>
 Package pdftex.def Info: assets/multicam.jpg  used on input line 67.
 (pdftex.def)             Requested size: 237.13594pt x 168.56543pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
 
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 73.
@@ -608,9 +611,6 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 77.
 
 
-LaTeX Warning: `!h' float specifier changed to `!ht'.
-
-
 Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 (hyperref)                removing `\@ifnextchar' on input line 100.
 
@@ -618,29 +618,31 @@ Package hyperref Warning: Token not allowed in a PDF string (Unicode):
 \tf@brf=\write4
 \openout4 = `main.brf'.
 
- [6 <./assets/per_camera_tracking.png> <./assets/multicam.jpg>]) [7] (./main.aux)
+ [6 <./assets/per_camera_tracking.png> <./assets/multicam.jpg>]) [7
+
+] (./main.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-02-20>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 7F0071C40AFEC5CAF63FD4D2B49DE3AB;8598.
+(rerunfilecheck)             Checksum: B0E6178D293B6699BB9AA05025791322;8178.
 Package rerunfilecheck Info: File `main.brf' has not changed.
-(rerunfilecheck)             Checksum: FE65DD9BAE621DFDF99E1C3E1960F97D;956.
+(rerunfilecheck)             Checksum: 6FDD12F3A4A5E00BE2A49F1DD1226F3B;962.
  ) 
 Here is how much of TeX's memory you used:
- 14937 strings out of 474116
- 248242 string characters out of 5743682
- 1950187 words of memory out of 5000000
- 37000 multiletter control sequences out of 15000+600000
+ 14946 strings out of 474116
+ 248465 string characters out of 5743682
+ 1948187 words of memory out of 5000000
+ 37009 multiletter control sequences out of 15000+600000
  588504 words of font info for 101 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 90i,12n,93p,1036b,605s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 90i,12n,93p,1036b,613s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times/utmr8a.pfb></usr/local/texlive/2024/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on main.pdf (7 pages, 8714211 bytes).
+Output written on main.pdf (7 pages, 9024511 bytes).
 PDF statistics:
- 365 PDF objects out of 1000 (max. 8388607)
- 309 compressed objects within 4 object streams
+ 364 PDF objects out of 1000 (max. 8388607)
+ 306 compressed objects within 4 object streams
  76 named destinations out of 1000 (max. 500000)
- 371 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 368 words of extra memory for PDF output out of 10000 (max. 10000000)
 

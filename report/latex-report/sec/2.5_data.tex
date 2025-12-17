@@ -1,21 +1,21 @@
-\section{\blue{Data}}
+\section{\black{Data}}
 \label{sec:data}
 
-\blue{We use the StreetAware dataset~\cite{piadyk_2023_q1byv-qc065}, a high-resolution synchronized multimodal urban scene dataset captured at a real 4-corner traffic intersection. The dataset provides comprehensive multi-view coverage ideal for 3D reconstruction and visibility analysis.}
+\black{We use the StreetAware dataset~\cite{piadyk_2023_q1byv-qc065}, a high-resolution synchronized multimodal urban scene dataset captured at a real 4-corner traffic intersection. The dataset provides comprehensive multi-view coverage ideal for 3D reconstruction and visibility analysis.}
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.8\linewidth]{assets/Camera_Placement.png}
-    \caption{\blue{Camera placement indicated by green markers at the 4-corner traffic intersection}}
+    \caption{\black{Camera placement indicated by green markers at the 4-corner traffic intersection}}
     \label{fig:camera_setup}
 \end{figure}
 
-\subsection{\blue{Data Characteristics}}
-\blue{\textbf{Camera Setup:} 8 synchronized RGB cameras mounted at 4 corner positions (2 cameras per corner, forming stereo pairs) provide full 360-degree coverage of the intersection.}
+\subsection{\black{Data Characteristics}}
+\black{\textbf{Camera Setup:} 8 synchronized RGB cameras mounted at 4 corner positions (2 cameras per corner, forming stereo pairs) provide full 360-degree coverage of the intersection.}
 
-\blue{\textbf{Synchronization:} All cameras are hardware-synchronized at 30 FPS, essential for stereo triangulation and multi-view 3D reconstruction.}
+\black{\textbf{Synchronization:} All cameras are hardware-synchronized at 30 FPS, essential for stereo triangulation and multi-view 3D reconstruction.}
 
-\blue{\textbf{Scene Complexity:} The intersection includes road surfaces, crosswalk markings, traffic signals, street furniture, parked vehicles, and moving traffic (cars, trucks, pedestrians, bicycles).}
+\black{\textbf{Scene Complexity:} The intersection includes road surfaces, crosswalk markings, traffic signals, street furniture, parked vehicles, and moving traffic (cars, trucks, pedestrians, bicycles).}
 
-\subsection{\blue{Data Processing}}
+\subsection{\black{Data Processing}}
 \blue{We extract static background frames via temporal median filtering over 300 frames to remove moving objects. For dynamic analysis, we leverage the stereo camera pairs at each corner for triangulation-based 3D localization, using Pi3-estimated camera parameters for projection.}

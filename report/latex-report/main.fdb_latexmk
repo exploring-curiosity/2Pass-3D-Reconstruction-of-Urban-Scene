@@ -1,14 +1,14 @@
 # Fdb version 4
-["bibtex main"] 1765991875.69297 "main.aux" "main.bbl" "main" 1765991878.04044 0
+["bibtex main"] 1765994796.08028 "main.aux" "main.bbl" "main" 1765994798.27763 0
   "./ieeenat_fullname.bst" 1766009338 26900 a296cb1ebee73f7bfa143751dc4e1dfd ""
   "./main.bib" 1766009338 5786 ad98809c7908a40689037ffd802dbe88 ""
-  "main.aux" 1765991877.84014 16385 ca8edc95286a3368477682e3a6a4533f "pdflatex"
+  "main.aux" 1765994798.07984 16493 b0487c2a3318c72eddf5d53be9c203a2 "pdflatex"
   (generated)
   "main.bbl"
   "main.blg"
   (rewritten before read)
-["pdflatex"] 1765991875.77188 "/Users/sudharshanramesh/Studies/ACV/Project/Experiments/2Pass-3D-Reconstruction-of-Urban-Scene/report/latex-report/main.tex" "main.pdf" "main" 1765991878.04059 0
-  "/Users/sudharshanramesh/Studies/ACV/Project/Experiments/2Pass-3D-Reconstruction-of-Urban-Scene/report/latex-report/main.tex" 1765991851.16129 1884 dc7c399e69a8b21735be5d3bc888bc88 ""
+["pdflatex"] 1765994796.15468 "/Users/sudharshanramesh/Studies/ACV/Project/Experiments/2Pass-3D-Reconstruction-of-Urban-Scene/report/latex-report/main.tex" "main.pdf" "main" 1765994798.27775 0
+  "/Users/sudharshanramesh/Studies/ACV/Project/Experiments/2Pass-3D-Reconstruction-of-Urban-Scene/report/latex-report/main.tex" 1765994770.80349 1845 ffac2962139fa5aa3457d6d2a087108f ""
   "/usr/local/texlive/2024/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2024/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2024/texmf-dist/fonts/tfm/adobe/helvetic/phvb.tfm" 1136768653 2300 14616918391efa49ac8b481a75fbdc1a ""
@@ -147,19 +147,20 @@
   "assets/multicam.jpg" 1766009358 407415 43a187a39b069e654dafa6d3bc6cdbcb ""
   "assets/object_tracking.png" 1766009354 3474742 cadc57cd7cfa0678fd8fc66f203561b4 ""
   "assets/per_camera_tracking.png" 1766009356 1060289 66740e6b6048fd2c8590fdb9af2ba517 ""
+  "assets/system_arch.png" 1765994741.78338 287403 e2479078e406396b31adeb332db4a8dd ""
   "cvpr.sty" 1766009338 17969 3445318c9c9e09b8ef62b6aaa240cbba ""
-  "main.aux" 1765991877.84014 16385 ca8edc95286a3368477682e3a6a4533f "pdflatex"
-  "main.bbl" 1765991875.76977 4043 2218c1189b8482aa0b101918e63a6a2a "bibtex main"
-  "main.brf" 1765991877.84111 956 fe65dd9bae621dfdf99e1c3e1960f97d "pdflatex"
-  "main.out" 1765991877.84099 8598 7f0071c40afec5caf63fd4d2b49de3ab "pdflatex"
-  "main.tex" 1765991851.16129 1884 dc7c399e69a8b21735be5d3bc888bc88 ""
-  "preamble.tex" 1765991766.42299 1618 3f9cfc7de0c9be9e63be859429b9286d ""
+  "main.aux" 1765994798.07984 16493 b0487c2a3318c72eddf5d53be9c203a2 "pdflatex"
+  "main.bbl" 1765994796.1528 4043 2218c1189b8482aa0b101918e63a6a2a "bibtex main"
+  "main.brf" 1765994798.0809 962 6fdd12f3a4a5e00be2a49f1dd1226f3b "pdflatex"
+  "main.out" 1765994798.08075 8178 b0e6178d293b6699bb9aa05025791322 "pdflatex"
+  "main.tex" 1765994770.80349 1845 ffac2962139fa5aa3457d6d2a087108f ""
+  "preamble.tex" 1765994097.05834 1660 d768ba6c3831c3571ff7d2308b0198c7 ""
   "sec/0_abstract.tex" 1766009338 778 40cd5c26804b32267b6d36c4184935c5 ""
-  "sec/1_intro.tex" 1766009338 2153 5a6d9f7e937b02e7d2030d7d67a2359b ""
-  "sec/2.5_data.tex" 1766009338 1486 649e87e8fbb239a76add7cb2adf87c79 ""
-  "sec/2_proposal.tex" 1766009338 2131 fc79fe422586b9d1f597360bb54dc501 ""
-  "sec/3_methodology.tex" 1766009338 12560 6efb1843b08fc2e46749d7aa051df22b ""
-  "sec/4_experiments.tex" 1765991872.86504 6504 c0dc39009e326e23e57f5cb9933062f8 ""
+  "sec/1_intro.tex" 1765994793.62991 2340 1aa0ae1e1fbd8e2e0c9d93cd93e320cf ""
+  "sec/2.5_data.tex" 1765994157.47373 1494 b923081f5c16215f4e0df03de35a1077 ""
+  "sec/2_proposal.tex" 1765993282.25187 2131 fc79fe422586b9d1f597360bb54dc501 ""
+  "sec/3_methodology.tex" 1765994487.5163 10823 8719d2fdb75398af90b898fdf0b74168 ""
+  "sec/4_experiments.tex" 1765994591.67049 6470 ff08975046df2d44175d5401b0ec21c9 ""
   (generated)
   "main.aux"
   "main.brf"

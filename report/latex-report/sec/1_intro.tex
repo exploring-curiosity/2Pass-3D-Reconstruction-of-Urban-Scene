@@ -5,6 +5,14 @@
 Urban intersection safety critically depends on visibility between pedestrians and approaching vehicles. At crosswalks, pedestrians often face blocked views due to parked cars, infrastructure, or other vehicles, creating serious safety risks. In the United States, 7,388 pedestrians were killed in traffic crashes in 2021, with limited sight distance cited as a contributing factor~\cite{nhtsa2023pedestrian}. Traditional line-of-sight (LoS) audits rely on manual 2D analysis or simple geometric rules that cannot capture complex 3D occlusions from dynamic objects and multi-view perspectives.
 
 \subsection{Our Approach}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1\linewidth]{assets/system_arch.png}
+    \caption{\black{System Methodology Flow}}
+    \label{fig:system_arch}
+\end{figure}
+
 We present a two-pass 3D reconstruction system that processes synchronized multi-camera video to create time-consistent scenes with both static geometry and tracked dynamic objects for automated LoS visibility audits. 
 
 \textbf{Pass 1 - Static Reconstruction:} We reconstruct the static scene using Pi3~\cite{pi3} to establish a shared world coordinate system and dense point cloud from 8 synchronized cameras at a 4-corner intersection.
