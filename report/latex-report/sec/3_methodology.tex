@@ -63,28 +63,30 @@
 \end{figure}
 
 \subsection{\black{Gaussian Splatting}}
-\subsubsection{\black{Gaussian Splatting for Dense Scene Representation}}
-\black{
-To improve geometric completeness and rendering stability of the reconstructed scene, we augment our pipeline with Gaussian Splatting–based scene representations for both static and dynamic components. Gaussian splatting provides a continuous volumetric approximation of point-based geometry while remaining efficient for multi-view rendering and ray-based visibility analysis.}
-
 \subsubsection{\blue{Gaussian Splatting for Static Scene Geometry}}
 \blue{
-The dense static point cloud produced in Pass 1 (via Pi3) is converted into a Gaussian Splatting representation using a 3D Gaussian Splatting (3DGS) formulation. Each point is modeled as an anisotropic 3D Gaussian defined by a mean position, covariance, opacity, and color. This representation transforms the discrete point cloud into a smooth, continuous density field while preserving fine structural details. The resulting static Gaussian scene acts as the primary environmental occlusion layer during visibility analysis.}
+The dense static point cloud produced in Pass 1 (via Pi3) is converted into a Gaussian Splatting representation using a 3D Gaussian Splatting (3DGS) formulation. Each point is modeled as an anisotropic 3D Gaussian parameterized by position, covariance, opacity, and color, converting the discrete point cloud into a continuous density field while preserving fine structural detail. The resulting static Gaussian scene serves as the primary environmental occlusion layer for visibility analysis.
+}
+
+We train the 3DGS model for 30,000 steps, which takes approximately 6 hours using Apple's MPS backend using the \textit{Brush} library. The resulting reconstruction is shown in Fig~\ref{fig:camera_fov_gaussian}. While the overall structure is captured, the splats exhibit significant self-occlusion artifacts. We attribute this primarily to the limited number of fixed camera views. In particular, planar regions such as road surfaces appear to be reconstructed from misaligned observations across cameras, resulting in overlapping or duplicated splats that cannot be reliably merged or pruned.
+
 
 \begin{figure}[t]
     \centering
     \includegraphics[width=0.85\linewidth]{assets/Gaussian.png}
-    \caption{\black{Camera positions and field-of-view coverage at the 4-corner intersection. Colored frustums show the overlapping views of the 8 synchronized cameras used for multi-view reconstruction. The resulting static scene point cloud is converted into a Gaussian Splatting (3DGS) representation, providing a dense and consistent geometric foundation for robust Line-of-Sight (LoS) visibility audits.}}
+    \caption{\black{Side-by-side comparison of the Gaussian splatting rendering (left) and the corresponding camera image (right). Visual occlusions and self-occlusion artifacts in the Gaussian representation are visible.}}
     \label{fig:camera_fov_gaussian}
 \end{figure}
 
 \subsubsection{\blue{Integration with Line-of-Sight Analysis}}
 \blue{
-During Pass 3, ray-casting for Line-of-Sight audits is performed against a unified Gaussian scene composed of: Static Gaussian splats representing infrastructure and parked elements.Dynamic Gaussian splats representing pedestrians and vehicles. Rays cast from pedestrian eye points accumulate opacity as they traverse Gaussian densities. A ray is considered occluded when accumulated transmittance falls below a fixed threshold. Visibility scores are computed using the same multi-ray bundle strategy described earlier, but with Gaussian-based density integration instead of point-wise intersection checks. This formulation improves robustness in cluttered urban scenes by: Eliminating sensitivity to point cloud sparsity, Enabling smoother visibility transitions over time, Preserving occluder identity by associating Gaussian splats with object-level primitives.}
+During Pass 3, Line-of-Sight ray casting is performed against a unified Gaussian scene composed of static Gaussian splats for infrastructure and dynamic Gaussian splats for pedestrians and vehicles. Rays cast from pedestrian eye points accumulate opacity as they traverse Gaussian densities, and are considered occluded once transmittance falls below a fixed threshold. Visibility scores are computed using the same multi-ray bundle strategy described earlier, but with Gaussian-based density integration instead of point-wise intersections. This improves robustness in cluttered scenes by reducing sensitivity to point cloud sparsity and enabling smoother visibility transitions.
+}
 
 \subsubsection{\black{Role of Gaussian Splatting in the Overall Pipeline}}
 \black{
-Gaussian splatting functions as a geometric representation layer, not a replacement for tracking or reconstruction. Pi3 provides the global world frame and static structure; YOLOv8x and ByteTrack provide dynamic object identities and trajectories; canonical primitives provide semantic abstraction; Gaussian splatting provides a dense, continuous spatial medium that enables reliable ray-based LoS auditing. This separation maintains modularity while improving the numerical stability and interpretability of visibility analysis at complex intersections.}
+Gaussian splatting acts as a geometric representation layer rather than a replacement for reconstruction or tracking. Pi3 provides the global frame and static structure; YOLOv8x and ByteTrack provide dynamic object identities; canonical primitives provide semantic abstraction; and Gaussian splatting provides a dense spatial medium for reliable ray-based LoS auditing. Attempts to clean the point cloud using Blender were not feasible due to scale, with over one million points, and mesh-based substitutes suffered from the same misalignment issues. We believe these limitations can be mitigated by incorporating additional camera viewpoints to improve geometric consistency.
+}
 
 \subsection{\black{Pass 3: Line-of-Sight Audit}}
 \black{For visibility analysis, we implement a ray-casting pipeline that determines precisely when an approaching vehicle becomes visible to a pedestrian. The pipeline processes a colored point cloud where dynamic objects (pedestrians, vehicles) are distinguished from static infrastructure via RGB color coding. To handle the complexity of dense point clouds and arbitrary metric scales, we employ scene segmentation, spatial voxelization, and biological scale calibration.}
