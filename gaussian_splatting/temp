@@ -1,0 +1,3 @@
+Reuploaded files for gaussian splatting.
+1. reconstruct_static_scene_gaussian splat.py present under pass1_static
+2. gaussian_splatting_dynamic.py present under pass2_dynamic
