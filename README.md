@@ -1,75 +1,124 @@
-# Traffic Intersection 3D Reconstruction
+# 3-Pass 3D Reconstruction of Urban Scenes with Line-of-Sight Audit
 
-Modular pipeline for 3D reconstruction of traffic scenes with dynamic object tracking.
+A modular pipeline for 4D (3D + time) reconstruction of traffic intersections using multi-camera video footage, with integrated safety analysis. The system performs static scene reconstruction, dynamic object tracking, and Line-of-Sight (LOS) visibility auditing for pedestrian-vehicle safety assessment.
 
-## 🎯 Overview
+## Overview
 
-Multi-camera 3D reconstruction system with two independent phases:
-
-1. **Static Scene Reconstruction**: DUSt3R-based point cloud generation
-2. **Dynamic Object Tracking & 3D Reconstruction**: Per-object 3D reconstruction with JSON position/angle mapping
-
-**Key Features:**
-- Modular, independent scripts that run sequentially
-- GPU-only processing (CUDA required)
-- Multi-camera object matching
-- JSON output for easy integration
-
-## 🏗️ Pipeline Architecture
+This pipeline processes synchronized multi-camera video feeds to create:
+1. **Static 3D Scene**: Dense point cloud of the environment (roads, buildings, infrastructure)
+2. **Dynamic 4D Tracking**: 3D trajectories of moving objects (vehicles, pedestrians) over time
+3. **Line-of-Sight Audit**: Visibility analysis between pedestrians and vehicles for safety assessment
+4. **Interactive Visualization**: Web-based 4D viewer with playback controls
 
 ```
-┌─────────────────────────────────┐
-│   INPUT: Multi-Camera Videos    │
-└─────────────────────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│   PHASE 1: Static Scene         │
-│   - DUSt3R 3D reconstruction    │
-│   - Camera pose estimation      │
-│   - Output: Point cloud + JSON  │
-└─────────────────────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│   PHASE 2A: Object Tracking     │
-│   - YOLOv8 detection            │
-│   - ByteTrack multi-object      │
-│   - SAM2 segmentation           │
-│   - Output: Tracks per camera   │
-└─────────────────────────────────┘
-              ↓
-┌─────────────────────────────────┐
-│   PHASE 2B: 3D Reconstruction   │
-│   - Multi-camera matching       │
-│   - 3D triangulation per object │
-│   - Position & angle mapping    │
-│   - Output: JSON + PLY files    │
-└─────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                    INPUT: 8-Camera Synchronized Video               │
+│        (s1-left, s1-right, s2-left, s2-right, ... s4-right)        │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     PASS 1: Static Scene Reconstruction             │
+│  ┌─────────────────┐    ┌──────────────────┐    ┌────────────────┐ │
+│  │ Background      │ -> │ Pi3 Multi-View   │ -> │ Orientation    │ │
+│  │ Extraction      │    │ Reconstruction   │    │ Correction     │ │
+│  └─────────────────┘    └──────────────────┘    └────────────────┘ │
+│                                                                     │
+│  Output: pi3_pointcloud_corrected.ply, pi3_cameras_corrected.json  │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     PASS 2: Dynamic Object Tracking                 │
+│  ┌─────────────────┐    ┌──────────────────┐    ┌────────────────┐ │
+│  │ YOLOv8          │ -> │ ByteTrack        │ -> │ Ground Plane   │ │
+│  │ Detection       │    │ Multi-Object     │    │ Projection     │ │
+│  └─────────────────┘    └──────────────────┘    └────────────────┘ │
+│                                                                     │
+│  Output: *_trajectories.json (per-camera 2D+3D tracks)             │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        3D Trajectory Reprojection                   │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │ Reproject 2D detections to 3D using calibrated cameras      │   │
+│  │ and estimated ground plane from Pass 1 point cloud          │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  Output: *_trajectories_pi3.json (3D world coordinates)            │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                     PASS 3: Line-of-Sight Audit                     │
+│  ┌─────────────────┐    ┌──────────────────┐    ┌────────────────┐ │
+│  │ Color-Based     │ -> │ Voxel Grid       │ -> │ Ray Bundle     │ │
+│  │ Segmentation    │    │ Occupancy        │    │ Casting        │ │
+│  └─────────────────┘    └──────────────────┘    └────────────────┘ │
+│                                                                     │
+│  Output: los_audit_report.json, BEV visualizations                 │
+└─────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                      Interactive 4D Web Viewer                      │
+│  - Static point cloud with color                                    │
+│  - Animated 3D bounding boxes for tracked objects                   │
+│  - Time slider for 4D playback                                      │
+│  - Orbit/pan/zoom camera controls                                   │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-## 🚀 Installation
+## Key Features
+
+- **Pi3 Neural Reconstruction**: Uses [Pi3](https://github.com/yyfz233/Pi3) for multi-view 3D reconstruction with automatic camera pose estimation
+- **Robust Object Tracking**: YOLOv8x detection + ByteTrack for consistent object tracking across frames
+- **Motion Classification**: Distinguishes stationary vs. moving objects using 3D displacement analysis
+- **Ground Plane Projection**: Projects 2D detections to 3D using estimated ground plane from point cloud
+- **Line-of-Sight Analysis**: Ray-casting based visibility analysis with voxel grid acceleration
+- **Safety Auditing**: Identifies critical occlusion zones between pedestrians and vehicles
+- **Memory-Efficient Processing**: GPU memory management to prevent OOM errors during long video processing
+- **Web-Based Visualization**: Three.js viewer for interactive 4D scene exploration
+
+## Installation
+
+### Prerequisites
+
+- NVIDIA GPU with CUDA support (RTX 3080+ recommended, 11+ GB VRAM)
+- Linux with CUDA drivers installed
+- Conda/Mamba package manager
+
+### Setup
 
 ```bash
-# Clone repository
-cd /home/rsu/Project/3DReconstruction/static-scene
+# Clone the repository
+git clone https://github.com/yourusername/2Pass-3D-Reconstruction-of-Urban-Scene.git
+cd 2Pass-3D-Reconstruction-of-Urban-Scene
 
 # Create conda environment
 mamba create -n acv2 python=3.10 -y
 mamba activate acv2
 
-# Install dependencies (GPU required)
+# Run automated installation
+chmod +x install_dependencies.sh
 ./install_dependencies.sh
 ```
 
-**Requirements:**
-- NVIDIA GPU with CUDA (RTX 3080+ recommended)
-- 11+ GB VRAM
-- Linux with CUDA drivers
+The installation script handles:
+- PyTorch with CUDA support
+- YOLOv8 (ultralytics)
+- ByteTrack for multi-object tracking
+- SAM2 for segmentation
+- DUSt3R/Pi3 for 3D reconstruction
+- All other dependencies
 
-## 📂 Data Preparation
+## Data Preparation
 
-Place your camera videos in `data/videos/`:
+Place your synchronized camera videos in the `StreetAware-sample/` directory:
+
 ```
-data/videos/
+StreetAware-sample/
 ├── s1-left.mp4
 ├── s1-right.mp4
 ├── s2-left.mp4
@@ -80,99 +129,127 @@ data/videos/
 └── s4-right.mp4
 ```
 
-## 🎬 Usage - Modular Execution
+Static background images should be extracted to:
+```
+data/processed/static_backgrounds/
+├── s1-left_bg.png
+├── s1-right_bg.png
+└── ...
+```
 
-Each script can be run **independently and sequentially**:
+## Usage
 
-### Phase 1: Static Scene Reconstruction
+### Option 1: Full Pipeline (Recommended)
 
 ```bash
-python pass1_static/reconstruct_static_scene.py
+python run_pipeline.py
+```
+
+This runs the complete pipeline:
+1. Pi3 static reconstruction
+2. Orientation correction
+3. Trajectory reprojection
+4. Launches the web viewer
+
+**Command-line options:**
+```bash
+python run_pipeline.py --skip-pass1    # Skip static reconstruction
+python run_pipeline.py --skip-pass2    # Skip dynamic tracking
+python run_pipeline.py --viewer-only   # Only launch viewer
+python run_pipeline.py --native-viewer # Use Open3D instead of web viewer
+python run_pipeline.py --clean         # Clean derived outputs first
+python run_pipeline.py --render-video  # Also render annotated MP4
+```
+
+### Option 2: Step-by-Step Execution
+
+#### Pass 1: Static Scene Reconstruction
+
+```bash
+# Extract static backgrounds (if not already done)
+python pass1_static/extract_static_backgrounds.py
+
+# Run Pi3 reconstruction
+python pass1_static/test_pi3.py
+
+# Fix orientation and scale
+python pass1_static/fix_pi3_orientation.py
 ```
 
 **Output:**
-- `outputs/pass1_static/dust3r_pointcloud.ply` - Static scene point cloud
-- `outputs/pass1_static/cameras.json` - Camera parameters
+- `outputs/pass1_static/pi3_pointcloud.ply` - Raw point cloud
+- `outputs/pass1_static/pi3_pointcloud_corrected.ply` - Oriented point cloud (Z-up)
+- `outputs/pass1_static/pi3_cameras_corrected.json` - Calibrated camera parameters
 
-### Phase 2A: Dynamic Object Tracking
+#### Pass 2: Dynamic Object Tracking
 
 ```bash
-python pass2_dynamic/track_objects.py
+# Track objects in each camera (run for each camera)
+python pass2_dynamic/single_video_motion.py --camera s1-left
+python pass2_dynamic/single_video_motion.py --camera s1-right
+# ... repeat for all cameras
+
+# Or run all cameras
+python pass2_dynamic/run_all_cameras_motion.py
+
+# Reproject trajectories to 3D
+python pass2_dynamic/reproject_trajectories.py
 ```
 
 **Output:**
-- `outputs/pass2_dynamic/tracks_<camera_id>.pkl` - Tracks per camera
+- `outputs/pass2_dynamic/<camera>_trajectories.json` - Per-camera 2D tracks
+- `outputs/pass2_dynamic/<camera>_trajectories_pi3.json` - 3D reprojected tracks
+- `outputs/pass2_dynamic/<camera>_motion_annotated.mp4` - Annotated video
 
-### Phase 2B: 3D Object Reconstruction
+#### Pass 3: Line-of-Sight Audit
 
 ```bash
-python pass2_dynamic/reconstruct_objects.py
+# Run LOS audit on scene with objects
+python "pass3_los audit/los_audit.py" --scene scene_with_objects.ply --output los_audit_report.json
+
+# Generate Bird's-Eye View visualizations
+python "pass3_los audit/visualize_los_audit.py" --report los_audit_report.json
 ```
 
 **Output:**
-- `outputs/pass2_dynamic/objects_3d/objects_3d.json` - **Main JSON mapping**
-- `outputs/pass2_dynamic/objects_3d/object_<id>.ply` - Per-object point clouds
-- `outputs/pass2_dynamic/objects_3d/summary.txt` - Summary statistics
+- `los_audit_report.json` - Complete visibility analysis
+- `los_visualizations/bev_combined.png` - Overview of all LOS rays
+- `los_visualizations/bev_<pedestrian_id>.png` - Per-pedestrian visibility
+- `los_visualizations/bev_safety_zones.png` - Critical occlusion zones
 
-### Phase 3: Interactive Visualization
+#### Visualization
 
 ```bash
-python visualize_tracking.py
+# Web-based 4D viewer
+python viewer/viewer_server.py
+
+# Native Open3D viewer
+python viewer/native_viewer.py
 ```
 
-**Features:**
-- **Left Panel:** Video playback with bounding boxes showing all tracked objects
-- **Right Panel:** 3D reconstruction and trajectory visualization
-- **Interactive Selection:** Click on objects or select from list to view their 3D reconstruction
-- **Playback Controls:** Play/pause, frame navigation, timeline scrubbing
-- **Real-time Info:** Velocities, directions, entry/exit times
+## Output Format
 
-**Controls:**
-- Select camera from dropdown
-- Click on object in video or select from track list
-- Use play/pause and frame navigation buttons
-- Drag timeline slider to scrub through video
-- View 3D trajectory and reconstruction in right panel
-
-## 📊 JSON Output Format
-
-The main output `objects_3d.json` contains position and angle mappings:
+### Trajectory JSON Structure
 
 ```json
 {
-  "metadata": {
-    "num_objects": 25,
-    "num_instances": 487,
-    "coordinate_system": "world",
-    "units": "meters"
-  },
-  "objects": [
+  "camera_id": "s1-left",
+  "fps": 30.0,
+  "num_tracks": 45,
+  "trajectories": [
     {
-      "object_id": 1,
-      "class_name": "person",
-      "num_instances": 45,
-      "temporal_span": {
-        "start_time": 0.0,
-        "end_time": 1.5,
-        "start_frame": 0,
-        "end_frame": 45
-      },
-      "instances": [
+      "track_id": 1,
+      "class_name": "car",
+      "category": "vehicle",
+      "is_stationary": false,
+      "num_frames": 150,
+      "frames": [
         {
-          "object_id": 1,
-          "timestamp": 0.0,
           "frame_idx": 0,
-          "class_name": "person",
-          "position_3d": [10.5, 2.3, 0.0],
-          "rotation": [0.0, 0.0, 1.57],
-          "bbox_3d": {
-            "min": [10.2, 2.0, -0.5],
-            "max": [10.8, 2.6, 0.5]
-          },
-          "dimensions": [0.6, 1.2, 0.5],
-          "num_views": 3,
-          "confidence": 0.85,
-          "camera_ids": ["s1-left", "s1-right", "s2-left"]
+          "time_sec": 0.0,
+          "bbox": [100, 200, 250, 350],
+          "center_px": [175, 275],
+          "position_3d": [5.2, 3.1, 0.0]
         }
       ]
     }
@@ -180,152 +257,236 @@ The main output `objects_3d.json` contains position and angle mappings:
 }
 ```
 
-**Key Fields:**
-- `position_3d`: [x, y, z] in world coordinates (meters)
-- `rotation`: [roll, pitch, yaw] in radians
-- `bbox_3d`: 3D bounding box (min/max corners)
-- `dimensions`: [width, height, depth]
-- `num_views`: Number of cameras that saw this object
-- `confidence`: Reconstruction confidence [0-1]
+### Camera JSON Structure
 
-## 📁 Directory Structure
+```json
+{
+  "s1-left": {
+    "K": [[fx, 0, cx], [0, fy, cy], [0, 0, 1]],
+    "R": [[...], [...], [...]],
+    "t": [x, y, z],
+    "pose_c2w": [[...4x4 matrix...]],
+    "width": 2592,
+    "height": 1944
+  }
+}
+```
+
+### LOS Audit Report Structure
+
+```json
+{
+  "summary": {
+    "total_pairs": 45,
+    "visible_pairs": 32,
+    "occluded_pairs": 13,
+    "avg_visibility_score": 0.72,
+    "scale_factor": 1.234,
+    "visibility_threshold": 0.60
+  },
+  "object_positions": {
+    "pedestrians": {
+      "person_1": {"centroid": [x, y, z], "heading": 0.0}
+    },
+    "vehicles": {
+      "car_1": {"centroid": [x, y, z], "heading": 1.57, "bbox_size": [4.5, 1.8, 1.5]}
+    }
+  },
+  "critical_occlusions": [
+    {
+      "pedestrian": "person_1",
+      "vehicle": "car_2",
+      "visibility_score": 0.2,
+      "distance": 8.5,
+      "primary_occluder": "parked_vehicle"
+    }
+  ],
+  "all_results": [...]
+}
+```
+
+## Project Structure
 
 ```
-static-scene/
+2Pass-3D-Reconstruction-of-Urban-Scene/
 ├── config/
-│   └── pipeline_config.yaml          # Configuration
+│   └── pipeline_config.yaml      # Pipeline configuration
 ├── data/
-│   └── videos/                        # Input videos (gitignored)
+│   └── processed/
+│       └── static_backgrounds/   # Extracted background images
 ├── pass1_static/
-│   └── reconstruct_static_scene.py   # Static reconstruction script
+│   ├── test_pi3.py              # Pi3 reconstruction
+│   ├── fix_pi3_orientation.py   # Orientation correction
+│   ├── extract_static_backgrounds.py
+│   └── ...                      # Alternative reconstruction methods
 ├── pass2_dynamic/
-│   ├── track_objects.py              # Tracking script
-│   └── reconstruct_objects.py        # 3D reconstruction script
+│   ├── single_video_motion.py   # Per-camera tracking
+│   ├── reproject_trajectories.py # 3D reprojection
+│   ├── run_all_cameras_motion.py
+│   └── ...                      # Multi-camera tracking variants
+├── pass3_los audit/
+│   ├── los_audit.py             # Line-of-Sight visibility analysis
+│   └── visualize_los_audit.py   # BEV visualization generation
+├── viewer/
+│   ├── viewer_server.py         # Web-based 4D viewer
+│   ├── native_viewer.py         # Open3D viewer
+│   └── data/                    # Viewer data files
 ├── utils/
-│   ├── camera_utils.py               # Camera utilities
-│   └── logger.py                     # Logging
-├── outputs/                          # All outputs (gitignored)
-│   ├── pass1_static/
-│   │   ├── dust3r_pointcloud.ply
-│   │   └── cameras.json
-│   └── pass2_dynamic/
-│       ├── tracks_*.pkl
-│       ├── trajectories.json         # 2D trajectory data
-│       └── objects_3d/
-│           ├── objects_3d.json       # ← Main output
-│           ├── object_*.ply
-│           └── summary.txt
-├── visualize_tracking.py             # Interactive visualizer
-├── install_dependencies.sh
-├── requirements.txt
-├── .gitignore                        # Excludes repos, models, data
+│   ├── camera_utils.py          # Camera projection utilities
+│   ├── geometry_utils.py        # 3D geometry functions
+│   ├── io_utils.py              # PLY/JSON I/O
+│   └── logger.py                # Logging utilities
+├── experiments/
+│   ├── scripts/                 # Evaluation scripts
+│   └── results/                 # Experiment results
+├── run_pipeline.py              # Main pipeline runner
+├── requirements.txt             # Python dependencies
+├── install_dependencies.sh      # Automated setup script
 └── README.md
 ```
 
-## ⚙️ Configuration
+## Line-of-Sight (LOS) Audit System
 
-Edit `config/pipeline_config.yaml`:
+The LOS Audit system (Pass 3) performs pedestrian-vehicle visibility analysis for traffic safety assessment.
+
+### How It Works
+
+1. **Color-Based Segmentation**: Objects are identified by color in the PLY file:
+   - 🔵 Blue (RGB: 51, 153, 230) → Pedestrians
+   - 🔴 Red (RGB: 230, 51, 51) → Cars
+   - 🟢 Green (RGB: 51, 179, 51) → Trucks
+   - 🟣 Pink (RGB: 204, 51, 204) → Cycles
+
+2. **Scale Calibration**: Uses biological prior (median pedestrian height = 1.7m) to calibrate scene scale
+
+3. **Voxel Grid Occupancy**: Static scene is voxelized (20cm leaf size) for efficient ray intersection
+
+4. **Ray Bundle Casting**: For each pedestrian-vehicle pair:
+   - Rays cast from pedestrian eye level (1.6m) to 5 vehicle keypoints
+   - Keypoints: bumper center, headlights (L/R), hood center, roof front
+   
+5. **Visibility Scoring**: 
+   - ≥60% rays clear → **Visible**
+   - 40-60% rays clear → **Partial**
+   - <40% rays clear → **Occluded**
+
+6. **Occluder Classification**:
+   - `static` - Infrastructure (buildings, poles, signs)
+   - `parked_vehicle` - Stationary vehicles
+   - `moving_vehicle` - Active traffic
+   - `pedestrian` - Other pedestrians
+
+### Output Visualizations
+
+The system generates Bird's-Eye View (BEV) diagrams:
+- **Combined BEV**: All pedestrian-vehicle rays with visibility coloring
+- **Per-Pedestrian BEV**: Individual visibility analysis
+- **Safety Zones**: Critical occlusion areas highlighted (distance < 15m, visibility < 40%)
+
+## Configuration
+
+Edit `config/pipeline_config.yaml` to customize:
 
 ```yaml
+data:
+  video_dir: "StreetAware-sample"
+  cameras: ["s1-left", "s1-right", ...]
+  fps: 30
+  frame_sampling: 5  # Process every 5th frame
+
 pass1_static:
   static_gaussians:
-    iterations: 1000  # DUSt3R iterations
+    iterations: 30000
 
 pass2_dynamic:
-  sample_rate: 5  # Process every 5th frame
-  
+  sample_rate: 5
   tracking:
-    detector: "yolov8x"  # YOLO model
+    detector: "yolov8x"
     conf_threshold: 0.3
-    iou_threshold: 0.5
-    
     pedestrian_classes: ["person"]
     vehicle_classes: ["car", "bus", "truck", "motorcycle", "bicycle"]
-  
-  segmentation:
-    method: "sam2"
-    use_box_prompts: true
-  
-  aggregation:
-    max_temporal_gap: 10  # Max frames between observations
-    min_observations: 2   # Min cameras to reconstruct
+
+hardware:
+  device: "cuda"
+  mixed_precision: true
 ```
 
-## 🔧 Technical Details
+## Performance
 
-### Phase 1: Static Scene
-- **DUSt3R**: Neural multi-view 3D reconstruction
-- **Output**: 1.3M point cloud with confidence filtering
-- **Cameras**: Automatic pose estimation
+**Tested on RTX 3080 (10GB VRAM):**
 
-### Phase 2A: Object Tracking
-- **YOLOv8x**: Object detection (pedestrians, vehicles)
-- **ByteTrack**: Multi-object tracking with occlusion handling
-- **SAM2**: Instance segmentation for precise masks
-- **Per-camera tracking**: Independent tracks saved
+| Stage | Time | Output |
+|-------|------|--------|
+| Background extraction | ~2 min/camera | 8 PNG images |
+| Pi3 reconstruction | ~3-5 min | ~1.6M points |
+| Orientation fix | ~30 sec | Corrected PLY + cameras |
+| Object tracking | ~5-10 min/camera | Trajectories JSON |
+| 3D reprojection | ~1 min | 3D trajectories |
+| LOS Audit | ~2-5 min | Visibility report + BEV figures |
 
-### Phase 2B: 3D Reconstruction
-- **Multi-camera matching**: Temporal and spatial association
-- **Triangulation**: 3D position from multiple views
-- **Geometry estimation**: Position, rotation, dimensions
-- **JSON export**: Easy integration with static scene
+## Troubleshooting
 
-## 🎯 Performance
+### GPU Memory Issues
 
-**Processing Time (RTX 3080):**
-- Static reconstruction: 2-3 minutes
-- Tracking (per camera): 5-10 minutes
-- 3D reconstruction: 1-2 minutes
+If you encounter OOM errors:
+1. Reduce `frame_sampling` in config (e.g., 5 → 10)
+2. The system includes automatic GPU memory management (see `FIXES_APPLIED.md`)
+3. Monitor GPU usage: `watch -n 1 nvidia-smi`
 
-**Expected Output:**
-- Static: 1.3M points
-- Tracking: 50-200 tracks per camera
-- Reconstruction: 10-50 global objects
+### CUDA Not Available
 
-## 🐛 Troubleshooting
-
-### "CUDA not available"
 ```bash
+# Verify CUDA installation
 nvidia-smi
 python -c "import torch; print(torch.cuda.is_available())"
 ```
 
-### "SAM2 not found"
-```bash
-cd sam2_repo
-pip install --no-build-isolation -e .
-```
+### Pi3/DUSt3R Import Errors
 
-### "DUSt3R import failed"
 ```bash
-cd dust3r
+# Ensure submodules are initialized
+cd Pi3  # or dust3r
 git submodule update --init --recursive
 pip install -r requirements.txt
 ```
 
-### "No tracks found"
-Check that Phase 2A completed successfully:
+### ByteTrack Issues
+
 ```bash
-ls outputs/pass2_dynamic/tracks_*.pkl
+cd ByteTrack
+pip install --no-build-isolation -e .
 ```
 
-## 📚 Dependencies
+## Dependencies
 
-- **PyTorch** 2.7+ (CUDA 11.8+)
+- **PyTorch** 2.0+ with CUDA
 - **ultralytics** (YOLOv8)
 - **ByteTrack** (multi-object tracking)
-- **SAM2** (segmentation)
-- **DUSt3R** (3D reconstruction)
-- **Open3D**, NumPy, OpenCV
+- **SAM2** (segmentation, optional)
+- **Pi3** (neural 3D reconstruction)
+- **Open3D** (point cloud processing)
+- **Three.js** (web visualization)
 
-## 🔗 References
+## References
 
-- [DUSt3R](https://github.com/naver/dust3r) - 3D reconstruction
+- [Pi3](https://github.com/yyfz233/Pi3) - Neural multi-view 3D reconstruction
+- [DUSt3R](https://github.com/naver/dust3r) - Alternative 3D reconstruction
 - [YOLOv8](https://github.com/ultralytics/ultralytics) - Object detection
 - [ByteTrack](https://github.com/ifzhang/ByteTrack) - Multi-object tracking
 - [SAM2](https://github.com/facebookresearch/segment-anything-2) - Segmentation
 
-## 📄 License
+## License
 
-This project combines multiple open-source components, each with their own licenses.
-Please refer to individual repositories for license details.
+This project combines multiple open-source components. Please refer to individual repositories for their respective licenses.
+
+## Citation
+
+If you use this pipeline in your research, please cite:
+
+```bibtex
+@software{3pass_3d_reconstruction,
+  title = {3-Pass 3D Reconstruction of Urban Scenes with Line-of-Sight Audit},
+  year = {2024},
+  url = {https://github.com/yourusername/2Pass-3D-Reconstruction-of-Urban-Scene}
+}
+```
