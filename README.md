@@ -31,11 +31,11 @@ This pipeline processes synchronized multi-camera video feeds to create:
 ┌─────────────────────────────────────────────────────────────────────┐
 │                     PASS 2: Dynamic Object Tracking                 │
 │  ┌─────────────────┐    ┌──────────────────┐    ┌────────────────┐ │
-│  │ YOLOv8          │ -> │ ByteTrack        │ -> │ Ground Plane   │ │
-│  │ Detection       │    │ Multi-Object     │    │ Projection     │ │
+│  │ YOLOv8x         │ -> │ Stereo           │ -> │ Kalman Filter  │ │
+│  │ Detection       │    │ Triangulation    │    │ + Association  │ │
 │  └─────────────────┘    └──────────────────┘    └────────────────┘ │
 │                                                                     │
-│  Output: *_trajectories.json (per-camera 2D+3D tracks)             │
+│  Output: scene_4d.json (3D tracks with canonical primitives)       │
 └─────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -184,22 +184,19 @@ python pass1_static/fix_pi3_orientation.py
 #### Pass 2: Dynamic Object Tracking
 
 ```bash
-# Track objects in each camera (run for each camera)
-python pass2_dynamic/single_video_motion.py --camera s1-left
-python pass2_dynamic/single_video_motion.py --camera s1-right
-# ... repeat for all cameras
-
-# Or run all cameras
-python pass2_dynamic/run_all_cameras_motion.py
-
-# Reproject trajectories to 3D
-python pass2_dynamic/reproject_trajectories.py
+# Run the full dynamic tracking pipeline
+python pass2_dynamic_v5/dynamic_tracker.py
 ```
 
+The dynamic tracker implements:
+- **YOLOv8x** for object detection (person, car, truck, bus, bicycle)
+- **Stereo triangulation** for 3D localization from camera pairs
+- **Kalman filter** (6-state) for smooth trajectory estimation
+- **Multi-camera association** using union-find clustering
+- **Canonical primitives** (oriented boxes for vehicles, cylinders for pedestrians)
+
 **Output:**
-- `outputs/pass2_dynamic/<camera>_trajectories.json` - Per-camera 2D tracks
-- `outputs/pass2_dynamic/<camera>_trajectories_pi3.json` - 3D reprojected tracks
-- `outputs/pass2_dynamic/<camera>_motion_annotated.mp4` - Annotated video
+- `outputs/pass2_dynamic_v5/scene_4d.json` - Complete 4D scene with static and dynamic objects
 
 #### Pass 3: Line-of-Sight Audit
 
@@ -319,11 +316,10 @@ python viewer/native_viewer.py
 │   ├── fix_pi3_orientation.py   # Orientation correction
 │   ├── extract_static_backgrounds.py
 │   └── ...                      # Alternative reconstruction methods
-├── pass2_dynamic/
-│   ├── single_video_motion.py   # Per-camera tracking
-│   ├── reproject_trajectories.py # 3D reprojection
-│   ├── run_all_cameras_motion.py
-│   └── ...                      # Multi-camera tracking variants
+├── pass2_dynamic_v5/
+│   ├── dynamic_tracker.py       # Main tracking pipeline (stereo triangulation + Kalman filter)
+│   ├── pairwise_tracker.py      # Stereo pair tracking utilities
+│   └── visualize.py             # Trajectory visualization
 ├── pass3_los audit/
 │   ├── los_audit.py             # Line-of-Sight visibility analysis
 │   └── visualize_los_audit.py   # BEV visualization generation
@@ -398,13 +394,18 @@ pass1_static:
   static_gaussians:
     iterations: 30000
 
-pass2_dynamic:
-  sample_rate: 5
+pass2_dynamic_v5:
   tracking:
     detector: "yolov8x"
-    conf_threshold: 0.3
-    pedestrian_classes: ["person"]
-    vehicle_classes: ["car", "bus", "truck", "motorcycle", "bicycle"]
+    conf_threshold: 0.4
+    stereo_triangulation: true
+    kalman_filter: true
+    association_dist_vehicle: 2.0  # meters
+    association_dist_person: 1.0   # meters
+  primitives:
+    car: {length: 4.5, width: 1.8, height: 1.5}
+    truck: {length: 7.0, width: 2.5, height: 3.0}
+    person: {radius: 0.25, height: 1.7}
 
 hardware:
   device: "cuda"
