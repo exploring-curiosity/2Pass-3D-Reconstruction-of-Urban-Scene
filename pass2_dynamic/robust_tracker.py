@@ -246,7 +246,7 @@ def triangulate_point(projectors: Dict[str, CameraProjector],
             return None
         
         return point
-    except:
+    except Exception:
         return None
 
 
