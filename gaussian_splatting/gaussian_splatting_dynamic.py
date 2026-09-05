@@ -17,7 +17,7 @@ from tqdm import tqdm
 from collections import defaultdict
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from two_pass_3d_tracker import run_two_pass_tracking  # import your tracker
+from two_pass_3d_tracker import run_two_pass_tracking, CameraProjector  # import your tracker
 
 # Optional: SAM2 or any segmentation model
 from segment_anything import sam_model_registry, SamPredictor
